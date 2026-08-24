@@ -27,7 +27,8 @@ export function useHostSession(sessionId: string) {
       reload()
     })
 
-    // Also listen to DB changes for real-time player joins
+    // Listen to DB changes for real-time player joins
+    // (requires: alter publication supabase_realtime add table public.session_players)
     const dbChannel = supabase
       .channel(`db-session-players:${sessionId}`)
       .on(
@@ -37,15 +38,26 @@ export function useHostSession(sessionId: string) {
       )
       .subscribe()
 
+    // Polling fallback: re-fetch every 3s during lobby/running
+    const poll = setInterval(() => reload(), 3000)
+
     return () => {
       channelRef.current?.unsubscribe()
       dbChannel.unsubscribe()
+      clearInterval(poll)
     }
   }, [sessionId])
 
-  async function startQuiz() {
-    await updateSession(sessionId, { status: 'RUNNING', started_at: new Date().toISOString() })
+  async function startQuiz(firstQuestionId: string) {
+    await updateSession(sessionId, {
+      status: 'RUNNING',
+      started_at: new Date().toISOString(),
+      current_question_id: firstQuestionId,
+      current_hint_index: 1,
+      accepting_answers: true,
+    })
     await broadcastEvent(sessionId, { type: 'SESSION_STARTED' })
+    await broadcastEvent(sessionId, { type: 'QUESTION_STARTED', questionId: firstQuestionId })
     await reload()
   }
 

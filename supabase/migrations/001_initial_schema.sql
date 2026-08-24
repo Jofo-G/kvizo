@@ -136,6 +136,10 @@ create policy "quiz members can read questions"
   on public.questions for select
   using (public.is_quiz_member(quiz_id));
 
+-- Players need to read questions and hints during live sessions
+create policy "anyone can read questions"
+  on public.questions for select using (true);
+
 create policy "quiz members can insert questions"
   on public.questions for insert
   with check (public.is_quiz_member(quiz_id));
@@ -218,6 +222,9 @@ create policy "quiz members can manage hints"
         and public.is_quiz_member(q.quiz_id)
     )
   );
+
+create policy "anyone can read hints"
+  on public.question_hints for select using (true);
 
 -- ============================================================
 -- player_profiles

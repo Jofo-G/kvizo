@@ -69,9 +69,13 @@ export function usePlayerSession(sessionId: string) {
       )
       .subscribe()
 
+    // Polling fallback for session state changes (hint reveals, question starts, etc.)
+    const poll = setInterval(() => reload(), 3000)
+
     return () => {
       channelRef.current?.unsubscribe()
       dbChannel.unsubscribe()
+      clearInterval(poll)
     }
   }, [sessionId])
 

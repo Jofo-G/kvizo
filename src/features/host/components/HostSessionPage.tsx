@@ -106,8 +106,8 @@ export function HostSessionPage() {
             <Button
               size="lg"
               className="w-full"
-              disabled={players.length === 0}
-              onClick={startQuiz}
+              disabled={players.length === 0 || !questions?.length}
+              onClick={() => startQuiz(questions![0].id)}
             >
               START QUIZ
             </Button>
@@ -117,24 +117,6 @@ export function HostSessionPage() {
         {/* RUNNING */}
         {isRunning && (
           <>
-            {/* Question picker */}
-            {!session.current_question_id && (
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <h2 className="text-lg font-bold text-white mb-4">Select question to start</h2>
-                <div className="flex flex-col gap-2">
-                  {questions?.map((q, i) => (
-                    <button
-                      key={q.id}
-                      onClick={() => startQuestion(q.id)}
-                      className="rounded-xl bg-gray-700 px-4 py-3 text-left hover:bg-indigo-700 transition-colors"
-                    >
-                      <span className="text-xs text-gray-400">Q{i + 1} · {q.type}</span>
-                      <p className="font-medium text-white">{q.text || `Question ${i + 1}`}</p>
-                    </button>
-                  ))}
-                </div>
-              </Card>
-            )}
 
             {/* Active question controls */}
             {session.current_question_id && (
@@ -180,7 +162,7 @@ export function HostSessionPage() {
                           size="lg"
                           onClick={() => startQuestion(questions![currentIdx + 1].id)}
                         >
-                          NEXT QUESTION
+                          NEXT QUESTION ({currentIdx + 2}/{questions?.length})
                         </Button>
                       )}
                     </>
