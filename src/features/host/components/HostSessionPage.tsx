@@ -271,44 +271,6 @@ export function HostSessionPage() {
                       </div>
                     )
                   })}
-                        <div>
-                          <span className="font-semibold text-white">{player?.display_name}</span>
-                          <p className="text-sm text-gray-300 mt-0.5">
-                            {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
-                          </p>
-                          {a.hint_index_at_submission != null && (
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2 items-center shrink-0 ml-4">
-                          <button
-                            onClick={() => handleOverride(a, true)}
-                            disabled={!!overrideLoading[a.id]}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
-                              a.is_correct === true
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-600 text-gray-300 hover:bg-green-700 hover:text-white'
-                            }`}
-                          >
-                            {overrideLoading[a.id] === 'approve' ? '…' : `✓ ${a.is_correct === true ? `${a.points_awarded}pts` : 'Approve'}`}
-                          </button>
-                          <button
-                            onClick={() => handleOverride(a, false)}
-                            disabled={!!overrideLoading[a.id]}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
-                              a.is_correct === false
-                                ? 'bg-red-500 text-white'
-                                : 'bg-gray-600 text-gray-300 hover:bg-red-700 hover:text-white'
-                            }`}
-                          >
-                            {overrideLoading[a.id] === 'reject' ? '…' : '✕ Reject'}
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })}
                 </div>
               </Card>
             )}
