@@ -20,6 +20,8 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
   const [openText, setOpenText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  // Tracks if player submitted at any point this question (survives hint resets)
+  const [hasEverSubmitted, setHasEverSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
   // Reset everything on new question
@@ -27,10 +29,11 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     setSelectedOptionId(null)
     setOpenText('')
     setSubmitted(false)
+    setHasEverSubmitted(false)
     setSubmitError('')
   }, [session.current_question_id])
 
-  // Allow re-answer when a new hint is revealed
+  // Allow re-answer when a new hint is revealed; keep hasEverSubmitted
   useEffect(() => {
     if (session.current_hint_index !== undefined && session.current_hint_index !== null) {
       setSubmitted(false)
@@ -97,6 +100,8 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     },
     enabled: isClosed && !!session.current_question_id,
     refetchInterval: isClosed ? 2000 : false,
+    refetchOnMount: true,
+    staleTime: 0,
   })
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,6 +116,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
         selectedOptionId: selectedOptionId || undefined,
       })
       setSubmitted(true)
+      setHasEverSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to submit')
     } finally {
@@ -143,7 +149,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* Score bar */}
       <div className="bg-indigo-600 px-4 py-2 flex items-center justify-between text-sm font-semibold text-white">
-        <span>{myPlayer.display_name} · Score: {myPlayer.score}</span>
+        <span>{myPlayer.display_name} · {isClosed ? `Score: ${myPlayer.score}` : '🔒'}</span>
         <span className="text-indigo-200">
           Q{question?.position ?? questionNumber}{totalQuestions > 0 ? `/${totalQuestions}` : ''}
         </span>
@@ -194,7 +200,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
                 </>
               ) : (
                 <p className="text-amber-700 dark:text-amber-400 font-semibold">
-                  {submitted ? '✓ Answer submitted — waiting for host review…' : 'Answers closed — no answer submitted'}
+                  {hasEverSubmitted ? '✓ Answer submitted — waiting for host review…' : 'Answers closed — no answer submitted'}
                 </p>
               )}
             </Card>
