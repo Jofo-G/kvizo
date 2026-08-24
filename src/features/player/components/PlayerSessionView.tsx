@@ -3,8 +3,10 @@ import { Card } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { PlayerProfile, SessionPlayer } from '@/shared/types'
+import { PLAYER_SESSION_ID_KEY, PLAYER_SESSION_KEY, PLAYER_TOKEN_KEY } from '@/shared/types'
 import { supabase } from '@/supabase/client'
 import { useQuery } from '@tanstack/react-query'
+import { fetchQuestions } from '../../quizzes/api/quizApi'
 import { useState } from 'react'
 import { usePlayerSession } from '../hooks/usePlayerSession'
 import { PlayerQuestionView } from './PlayerQuestionView'
@@ -46,6 +48,13 @@ export function PlayerSessionView({ sessionId }: Props) {
   const [newName, setNewName] = useState('')
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
+
+  function leaveSession() {
+    localStorage.removeItem(PLAYER_TOKEN_KEY)
+    localStorage.removeItem(PLAYER_SESSION_KEY)
+    localStorage.removeItem(PLAYER_SESSION_ID_KEY)
+    window.location.reload()
+  }
 
   const { data: profiles, isLoading: profilesLoading } = useQuery({
     queryKey: ['player_profiles'],
@@ -146,9 +155,15 @@ export function PlayerSessionView({ sessionId }: Props) {
             {myPlayer?.display_name}
           </p>
           <p className="text-gray-500 dark:text-gray-400 mb-6">Waiting for host to start…</p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 mb-4">
             {activePlayers.length} player{activePlayers.length !== 1 ? 's' : ''} joined
           </p>
+          <button
+            onClick={leaveSession}
+            className="text-xs text-gray-400 hover:text-red-500 underline"
+          >
+            Wrong name? Change player
+          </button>
         </Card>
       </div>
     )
@@ -180,12 +195,24 @@ export function PlayerSessionView({ sessionId }: Props) {
     )
   }
 
+  const { data: questions } = useQuery({
+    queryKey: ['questions', session?.quiz_id],
+    queryFn: () => fetchQuestions(session!.quiz_id),
+    enabled: !!session?.quiz_id,
+  })
+
+  const currentQuestionIndex = questions?.findIndex(
+    (q) => q.id === session?.current_question_id,
+  ) ?? -1
+
   // Running
   return (
     <PlayerQuestionView
       session={session}
       myPlayer={myPlayer!}
       submitAnswer={submitAnswer}
+      questionNumber={currentQuestionIndex + 1}
+      totalQuestions={questions?.length ?? 0}
     />
   )
 }

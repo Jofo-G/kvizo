@@ -2,6 +2,7 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { QuizSession, QuestionOptionSafe, SessionPlayer } from '@/shared/types'
+import { PLAYER_SESSION_KEY, PLAYER_TOKEN_KEY } from '@/shared/types'
 import { supabase } from '@/supabase/client'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -10,9 +11,11 @@ interface Props {
   session: QuizSession
   myPlayer: SessionPlayer
   submitAnswer: (params: { questionId: string; answerText?: string; selectedOptionId?: string }) => Promise<void>
+  questionNumber: number
+  totalQuestions: number
 }
 
-export function PlayerQuestionView({ session, myPlayer, submitAnswer }: Props) {
+export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNumber, totalQuestions }: Props) {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [openText, setOpenText] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -112,11 +115,32 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer }: Props) {
 
   const isClosed = !session.accepting_answers
 
+  // Poll own answer result after host closes and reviews
+  const { data: reviewResult } = useQuery<{ is_correct: boolean | null; points_awarded: number } | null>({
+    queryKey: ['my_answer', session.current_question_id, isClosed],
+    queryFn: async () => {
+      const playerId = localStorage.getItem(PLAYER_SESSION_KEY)
+      const token = localStorage.getItem(PLAYER_TOKEN_KEY)
+      if (!playerId || !token || !session.current_question_id) return null
+      const { data } = await supabase.rpc('get_my_answer', {
+        p_session_player_id: playerId,
+        p_player_token: token,
+        p_question_id: session.current_question_id,
+      })
+      return data ?? null
+    },
+    enabled: isClosed && !!session.current_question_id,
+    refetchInterval: isClosed ? 2000 : false,
+  })
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* Score bar */}
-      <div className="bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white">
-        {myPlayer.display_name} · Score: {myPlayer.score}
+      <div className="bg-indigo-600 px-4 py-2 flex items-center justify-between text-sm font-semibold text-white">
+        <span>{myPlayer.display_name} · Score: {myPlayer.score}</span>
+        {totalQuestions > 0 && (
+          <span className="text-indigo-200">Q{questionNumber}/{totalQuestions}</span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center p-4">
@@ -146,12 +170,27 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer }: Props) {
             </Card>
           )}
 
-          {/* Closed notice */}
+          {/* Closed notice — green immediately if correct, waiting otherwise until host acts */}
           {isClosed && (
-            <Card className="text-center bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700">
-              <p className="text-amber-700 dark:text-amber-400 font-semibold">
-                {submitted ? '✓ Answer submitted — waiting for host to review' : 'Answers closed — no answer submitted'}
-              </p>
+            <Card className={`text-center ${
+              reviewResult?.is_correct === true
+                ? 'bg-green-50 border-green-400 dark:bg-green-950/40 dark:border-green-600'
+                : 'bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700'
+            }`}>
+              {reviewResult?.is_correct === true ? (
+                <>
+                  <p className="text-xl font-bold text-green-700 dark:text-green-400">
+                    ✓ Correct! +{reviewResult.points_awarded} points
+                  </p>
+                  <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                    Total: {myPlayer.score}
+                  </p>
+                </>
+              ) : (
+                <p className="text-amber-700 dark:text-amber-400 font-semibold">
+                  {submitted ? '✓ Answer submitted — waiting for host review…' : 'Answers closed — no answer submitted'}
+                </p>
+              )}
             </Card>
           )}
 

@@ -12,6 +12,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Users } from 'lucide-react'
+import { useState } from 'react'
 
 export function HostSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -61,9 +62,16 @@ export function HostSessionPage() {
     currentQuestion?.type === 'PROGRESSIVE_HINTS' &&
     (session?.current_hint_index ?? 0) >= (currentHints?.length ?? 0)
 
+  const [overrideLoading, setOverrideLoading] = useState<Record<string, 'approve' | 'reject' | null>>({})
+
   async function handleOverride(answer: Answer, correct: boolean) {
-    await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
-    await refreshLeaderboard()
+    setOverrideLoading((prev) => ({ ...prev, [answer.id]: correct ? 'approve' : 'reject' }))
+    try {
+      await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
+      await refreshLeaderboard()
+    } finally {
+      setOverrideLoading((prev) => ({ ...prev, [answer.id]: null }))
+    }
   }
 
   if (loading) return <LoadingSpinner />
@@ -233,23 +241,25 @@ export function HostSessionPage() {
                         <div className="flex gap-2 items-center shrink-0 ml-4">
                           <button
                             onClick={() => handleOverride(a, true)}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors ${
+                            disabled={!!overrideLoading[a.id]}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
                               a.is_correct === true
                                 ? 'bg-green-500 text-white'
                                 : 'bg-gray-600 text-gray-300 hover:bg-green-700 hover:text-white'
                             }`}
                           >
-                            ✓ {a.is_correct === true ? `${a.points_awarded}pts` : 'Approve'}
+                            {overrideLoading[a.id] === 'approve' ? '…' : `✓ ${a.is_correct === true ? `${a.points_awarded}pts` : 'Approve'}`}
                           </button>
                           <button
                             onClick={() => handleOverride(a, false)}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors ${
+                            disabled={!!overrideLoading[a.id]}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
                               a.is_correct === false
                                 ? 'bg-red-500 text-white'
                                 : 'bg-gray-600 text-gray-300 hover:bg-red-700 hover:text-white'
                             }`}
                           >
-                            ✕ Reject
+                            {overrideLoading[a.id] === 'reject' ? '…' : '✕ Reject'}
                           </button>
                         </div>
                       </div>
