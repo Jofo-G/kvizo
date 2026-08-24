@@ -9,7 +9,7 @@ import { useCreateQuiz, useDeleteQuiz, useMyQuizzes } from '../hooks/useQuizzes'
 import { formatDate } from '@/shared/lib/utils'
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth()
+  const { user, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const { data: quizzes, isLoading } = useMyQuizzes()
   const createMutation = useCreateQuiz()
@@ -35,6 +35,14 @@ export function DashboardPage() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Kvizo</h1>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</span>
+            {isAdmin && (
+              <Link
+                to="/admin/users"
+                className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+              >
+                Manage Players
+              </Link>
+            )}
             <Button variant="ghost" size="sm" onClick={signOut}>
               Sign out
             </Button>

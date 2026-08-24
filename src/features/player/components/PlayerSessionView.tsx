@@ -1,6 +1,4 @@
-import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
-import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { PlayerProfile, SessionPlayer } from '@/shared/types'
 import { PLAYER_SESSION_ID_KEY, PLAYER_SESSION_KEY, PLAYER_TOKEN_KEY } from '@/shared/types'
@@ -20,16 +18,6 @@ async function fetchPlayerProfiles(): Promise<PlayerProfile[]> {
   return data as PlayerProfile[]
 }
 
-async function createPlayerProfile(name: string): Promise<PlayerProfile> {
-  const { data, error } = await supabase
-    .from('player_profiles')
-    .insert({ name })
-    .select()
-    .single()
-  if (error) throw error
-  return data as PlayerProfile
-}
-
 interface Props {
   sessionId: string
 }
@@ -45,7 +33,6 @@ export function PlayerSessionView({ sessionId }: Props) {
     submitAnswer,
   } = usePlayerSession(sessionId)
 
-  const [newName, setNewName] = useState('')
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState('')
 
@@ -98,21 +85,6 @@ export function PlayerSessionView({ sessionId }: Props) {
     }
   }
 
-  async function handleJoinNew(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newName.trim()) return
-    setError('')
-    setJoining(true)
-    try {
-      const profile = await createPlayerProfile(newName.trim())
-      await joinSession(profile.id, profile.name)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join')
-    } finally {
-      setJoining(false)
-    }
-  }
-
   if (loading) return <LoadingSpinner />
   if (!session) return <p className="p-8 text-center">Session not found.</p>
 
@@ -120,12 +92,16 @@ export function PlayerSessionView({ sessionId }: Props) {
   if (!isJoined) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
-        <Card className="w-full max-w-sm">
-          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">Choose your name</h2>
+        <Card className="w-full max-w-lg">
+          <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">Who are you?</h2>
           {profilesLoading ? (
             <LoadingSpinner />
+          ) : profiles?.length === 0 ? (
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No players have been set up yet. Ask the host to add players.
+            </p>
           ) : (
-            <div className="flex flex-col gap-2 mb-4">
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {profiles?.map((p) => {
                 const taken = activePlayers.some((sp) => sp.player_profile_id === p.id)
                 return (
@@ -133,34 +109,36 @@ export function PlayerSessionView({ sessionId }: Props) {
                     key={p.id}
                     disabled={taken || joining}
                     onClick={() => handleJoinExisting(p)}
-                    className={`rounded-xl px-4 py-3 text-left font-medium transition-colors ${
+                    className={`flex flex-col items-center gap-1 rounded-xl p-2 transition-colors ${
                       taken
-                        ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed'
-                        : 'bg-white border border-gray-200 text-gray-900 hover:bg-indigo-50 hover:border-indigo-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-indigo-900/30'
+                        ? 'cursor-not-allowed opacity-40'
+                        : 'hover:bg-indigo-50 hover:ring-2 hover:ring-indigo-400 dark:hover:bg-indigo-900/30'
                     }`}
                   >
-                    {p.name}{' '}
+                    {/* headstone: avatar above name */}
+                    {p.avatar_url ? (
+                      <img
+                        src={p.avatar_url}
+                        alt={p.name}
+                        className="h-16 w-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+                        {p.name[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-center text-sm font-medium leading-tight text-gray-900 dark:text-white">
+                      {p.name}
+                    </span>
                     {taken && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">— Joined</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">Joined</span>
                     )}
                   </button>
                 )
               })}
             </div>
           )}
-
-          <form onSubmit={handleJoinNew} className="flex flex-col gap-3 border-t pt-4 border-gray-200 dark:border-gray-700">
-            <Input
-              placeholder="+ New player name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <Button type="submit" disabled={joining || !newName.trim()}>
-              {joining ? 'Joining…' : 'Join as new player'}
-            </Button>
-          </form>
-
-          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
         </Card>
       </div>
     )
@@ -168,12 +146,27 @@ export function PlayerSessionView({ sessionId }: Props) {
 
   // ── Joined: show lobby or active question ────────────────────
   if (session.status === 'LOBBY') {
+    const myProfile = profiles?.find((p) => p.id === myPlayer?.player_profile_id)
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
         <Card className="w-full max-w-sm text-center">
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {myPlayer?.display_name}
-          </p>
+          {/* headstone: avatar above name */}
+          <div className="mb-4 flex flex-col items-center gap-3">
+            {myProfile?.avatar_url ? (
+              <img
+                src={myProfile.avatar_url}
+                alt={myPlayer?.display_name}
+                className="h-24 w-24 rounded-full object-cover border-4 border-indigo-400 shadow-lg"
+              />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-indigo-100 text-4xl font-bold text-indigo-600 border-4 border-indigo-400 shadow-lg dark:bg-indigo-900/40 dark:text-indigo-400">
+                {myPlayer?.display_name[0]?.toUpperCase()}
+              </div>
+            )}
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {myPlayer?.display_name}
+            </p>
+          </div>
           <p className="text-gray-500 dark:text-gray-400 mb-6">Waiting for host to start…</p>
           <p className="text-sm text-gray-400 mb-4">
             {activePlayers.length} player{activePlayers.length !== 1 ? 's' : ''} joined

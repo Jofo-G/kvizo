@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { AuthProvider } from '../../features/auth/AuthProvider'
 import { LoginPage } from '../../features/auth/LoginPage'
 import { ProtectedRoute } from '../../features/auth/ProtectedRoute'
+import { AdminRoute } from '../../features/auth/AdminRoute'
 import { SessionResultsPage } from '../../features/history/components/SessionResultsPage'
 import { HostSessionPage } from '../../features/host/components/HostSessionPage'
 import { JoinPage } from '../../features/player/components/JoinPage'
@@ -11,6 +12,7 @@ import { PlayPage } from '../../features/player/components/PlayPage'
 import { QuizEditorPage } from '../../features/quiz-editor/components/QuizEditorPage'
 import { DashboardPage } from '../../features/quizzes/components/DashboardPage'
 import { QuizDetailsPage } from '../../features/quizzes/components/QuizDetailsPage'
+import { AdminUsersPage } from '../../features/admin/components/AdminUsersPage'
 
 function AuthCallbackPage() {
   const navigate = useNavigate()
@@ -83,6 +85,14 @@ export function AppRouter() {
                 <ProtectedRoute>
                   <SessionResultsPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <AdminUsersPage />
+                </AdminRoute>
               }
             />
 

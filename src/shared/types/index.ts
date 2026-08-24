@@ -9,6 +9,7 @@ export type MemberRole = 'OWNER' | 'EDITOR'
 export interface UserProfile {
   id: string
   display_name: string
+  is_admin: boolean
   created_at: string
 }
 
@@ -87,6 +88,7 @@ export interface QuizSession {
 export interface PlayerProfile {
   id: string
   name: string
+  avatar_url: string | null
   user_id: string | null
   created_at: string
 }
