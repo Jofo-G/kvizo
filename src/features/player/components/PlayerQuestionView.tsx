@@ -111,7 +111,13 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     )
   }
 
-  if (!question) return <LoadingSpinner />
+  if (!question) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
   const isClosed = !session.accepting_answers
 

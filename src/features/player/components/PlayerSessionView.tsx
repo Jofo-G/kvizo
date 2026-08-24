@@ -53,10 +53,12 @@ export function PlayerSessionView({ sessionId }: Props) {
     const playerId = localStorage.getItem(PLAYER_SESSION_KEY)
     const token = localStorage.getItem(PLAYER_TOKEN_KEY)
     if (playerId && token) {
-      await supabase.rpc('leave_session', {
-        p_session_player_id: playerId,
-        p_player_token: token,
-      }).catch(() => {/* ignore errors — still clear localStorage */})
+      try {
+        await supabase.rpc('leave_session', {
+          p_session_player_id: playerId,
+          p_player_token: token,
+        })
+      } catch {/* ignore — still clear localStorage */}
     }
     localStorage.removeItem(PLAYER_TOKEN_KEY)
     localStorage.removeItem(PLAYER_SESSION_KEY)
