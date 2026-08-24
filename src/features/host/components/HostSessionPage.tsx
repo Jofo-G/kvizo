@@ -45,6 +45,22 @@ export function HostSessionPage() {
     refetchInterval: 3000,
   })
 
+  const { data: currentHints } = useQuery({
+    queryKey: ['hints', session?.current_question_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('question_hints')
+        .select('id')
+        .eq('question_id', session!.current_question_id)
+      return data ?? []
+    },
+    enabled: currentQuestion?.type === 'PROGRESSIVE_HINTS' && !!session?.current_question_id,
+  })
+
+  const allHintsRevealed =
+    currentQuestion?.type === 'PROGRESSIVE_HINTS' &&
+    (session?.current_hint_index ?? 0) >= (currentHints?.length ?? 0)
+
   async function handleOverride(answer: Answer, correct: boolean) {
     await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
     await refreshLeaderboard()
@@ -144,10 +160,13 @@ export function HostSessionPage() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {isProgressiveHints && session.accepting_answers && (
+                  {isProgressiveHints && session.accepting_answers && !allHintsRevealed && (
                     <Button variant="secondary" size="lg" onClick={revealNextHint}>
                       REVEAL HINT {(session.current_hint_index ?? 0) + 1}
                     </Button>
+                  )}
+                  {isProgressiveHints && allHintsRevealed && session.accepting_answers && (
+                    <p className="text-center text-sm text-gray-400">All hints revealed</p>
                   )}
                   {session.accepting_answers && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
@@ -182,43 +201,63 @@ export function HostSessionPage() {
               </Card>
             )}
 
-            {/* Answer review for open questions */}
-            {!session.accepting_answers &&
-              currentQuestion &&
-              (currentQuestion.type === 'OPEN' || currentQuestion.type === 'PROGRESSIVE_HINTS') && (
-                <Card className="dark:bg-gray-800 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-3">Answer Review</h3>
-                  <div className="flex flex-col gap-2">
-                    {currentAnswers?.map((a) => {
-                      const player = players.find((p) => p.id === a.session_player_id)
-                      return (
-                        <div
-                          key={a.id}
-                          className="flex items-center justify-between rounded-lg bg-gray-700 px-4 py-2"
-                        >
-                          <div>
-                            <span className="font-medium text-white">{player?.display_name}</span>
-                            <p className="text-sm text-gray-300">{a.answer_text}</p>
-                          </div>
-                          <div className="flex gap-2 items-center">
-                            <span
-                              className={`text-sm font-semibold ${a.is_correct ? 'text-green-400' : 'text-red-400'}`}
-                            >
-                              {a.is_correct ? `✓ ${a.points_awarded}pts` : '✕'}
-                            </span>
-                            <button
-                              onClick={() => handleOverride(a, !a.is_correct)}
-                              className="text-xs text-indigo-400 hover:text-indigo-200"
-                            >
-                              Override
-                            </button>
-                          </div>
+            {/* Answer review — shown for ALL question types after answers close */}
+            {!session.accepting_answers && currentQuestion && (currentAnswers?.length ?? 0) > 0 && (
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-3">
+                  Answer Review — approve or reject each answer
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {currentAnswers?.map((a) => {
+                    const player = players.find((p) => p.id === a.session_player_id)
+                    return (
+                      <div
+                        key={a.id}
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                          a.is_correct === true ? 'bg-green-900/40' :
+                          a.is_correct === false ? 'bg-red-900/30' :
+                          'bg-gray-700'
+                        }`}
+                      >
+                        <div>
+                          <span className="font-semibold text-white">{player?.display_name}</span>
+                          <p className="text-sm text-gray-300 mt-0.5">
+                            {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
+                          </p>
+                          {a.hint_index_at_submission != null && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
+                            </p>
+                          )}
                         </div>
-                      )
-                    })}
-                  </div>
-                </Card>
-              )}
+                        <div className="flex gap-2 items-center shrink-0 ml-4">
+                          <button
+                            onClick={() => handleOverride(a, true)}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors ${
+                              a.is_correct === true
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-600 text-gray-300 hover:bg-green-700 hover:text-white'
+                            }`}
+                          >
+                            ✓ {a.is_correct === true ? `${a.points_awarded}pts` : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => handleOverride(a, false)}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors ${
+                              a.is_correct === false
+                                ? 'bg-red-500 text-white'
+                                : 'bg-gray-600 text-gray-300 hover:bg-red-700 hover:text-white'
+                            }`}
+                          >
+                            ✕ Reject
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+            )}
 
             {/* Leaderboard */}
             {!session.accepting_answers && players.length > 0 && (

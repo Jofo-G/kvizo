@@ -206,6 +206,16 @@ export function QuestionEditor({
       )}
 
       {question.type === 'PROGRESSIVE_HINTS' && (
+        <Input
+          label="Points for answering with NO hint shown"
+          type="number"
+          min={1}
+          value={defaultPoints}
+          onChange={(e) => setDefaultPoints(Number(e.target.value))}
+        />
+      )}
+
+      {question.type === 'PROGRESSIVE_HINTS' && (
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Hints</label>
           {hints.map((hint, i) => (

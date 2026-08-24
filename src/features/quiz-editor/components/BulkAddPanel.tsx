@@ -108,9 +108,23 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
             />
           </div>
 
-          {/* Hints config */}
+          {/* Progressive hints config */}
           {type === 'PROGRESSIVE_HINTS' && (
-            <div className="flex flex-col gap-2">
+            <>
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
+                  Points — no hint
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={defaultPoints}
+                  onChange={(e) => setDefaultPoints(Number(e.target.value))}
+                  className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                />
+                <span className="text-xs text-gray-400">awarded if answered before any hint</span>
+              </div>
+              <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Hints (points per hint)
               </label>
@@ -146,7 +160,8 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
               <p className="text-xs text-gray-400">
                 Each question gets {hintPoints.length} hint(s). Answers left blank — fill them in after.
               </p>
-            </div>
+              </div>
+            </>
           )}
 
           {/* Multiple choice option count */}

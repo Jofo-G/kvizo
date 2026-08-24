@@ -147,31 +147,22 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, submitResu
             </Card>
           )}
 
-          {/* Closed + result */}
+          {/* Closed notice */}
           {isClosed && (
-            <Card className={`text-center ${
-              submitResult
-                ? submitResult.is_correct
-                  ? 'bg-green-50 border-green-400 dark:bg-green-950/40 dark:border-green-600'
-                  : 'bg-red-50 border-red-400 dark:bg-red-950/40 dark:border-red-600'
-                : 'bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700'
-            }`}>
-              {submitResult ? (
-                <p className={`text-xl font-bold ${submitResult.is_correct ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-                  {submitResult.is_correct ? `✓ Correct! +${submitResult.points_awarded} points` : '✕ Incorrect'}
-                </p>
-              ) : (
-                <p className="text-amber-700 dark:text-amber-400 font-semibold">Answers closed — no answer submitted</p>
-              )}
+            <Card className="text-center bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700">
+              <p className="text-amber-700 dark:text-amber-400 font-semibold">
+                {submitted ? '✓ Answer submitted — waiting for host to review' : 'Answers closed — no answer submitted'}
+              </p>
             </Card>
           )}
 
           {/* Submitted confirmation while still open */}
           {submitted && !isClosed && (
-            <Card className={`text-center ${submitResult?.is_correct ? 'bg-green-50 border-green-400 dark:bg-green-950/40' : 'bg-red-50 border-red-400 dark:bg-red-950/40'}`}>
-              <p className={`text-lg font-bold ${submitResult?.is_correct ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                {submitResult?.is_correct ? `✓ Correct! +${submitResult.points_awarded} pts` : '✕ Wrong — wait for next hint or try again when revealed'}
+            <Card className="text-center bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
+              <p className="text-gray-700 dark:text-gray-200 font-semibold">
+                ✓ Answer submitted
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">You can update your answer until the host closes the question</p>
             </Card>
           )}
 
