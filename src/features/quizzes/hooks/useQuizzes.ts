@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  createQuiz,
-  deleteQuiz,
-  fetchMyQuizzes,
-  fetchQuiz,
-  updateQuiz,
+    createQuiz,
+    deleteQuiz,
+    fetchMyQuizzes,
+    fetchQuiz,
+    updateQuiz,
 } from '../api/quizApi'
 
 export function useMyQuizzes() {

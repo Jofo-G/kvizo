@@ -2,8 +2,8 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
-  fetchAnswersForQuestion,
-  fetchQuestions,
+    fetchAnswersForQuestion,
+    fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'

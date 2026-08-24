@@ -2,10 +2,10 @@ import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { formatDate } from '@/shared/lib/utils'
 import {
-  fetchAnswersForSession,
-  fetchQuestions,
-  fetchSession,
-  fetchSessionPlayers,
+    fetchAnswersForSession,
+    fetchQuestions,
+    fetchSession,
+    fetchSessionPlayers,
 } from '../../quizzes/api/quizApi'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft } from 'lucide-react'

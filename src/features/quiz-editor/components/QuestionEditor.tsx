@@ -3,13 +3,13 @@ import { Card } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
 import type { AcceptedAnswer, Question, QuestionHint, QuestionOption } from '@/shared/types'
 import {
-  fetchAcceptedAnswers,
-  fetchHints,
-  fetchOptions,
-  updateQuestion,
-  upsertAcceptedAnswers,
-  upsertHints,
-  upsertOptions,
+    fetchAcceptedAnswers,
+    fetchHints,
+    fetchOptions,
+    updateQuestion,
+    upsertAcceptedAnswers,
+    upsertHints,
+    upsertOptions,
 } from '../../quizzes/api/quizApi'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'

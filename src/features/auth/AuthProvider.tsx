@@ -1,11 +1,11 @@
 import { supabase } from '@/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    type ReactNode,
 } from 'react'
 
 interface AuthContextValue {
