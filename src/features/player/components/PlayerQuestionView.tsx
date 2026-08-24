@@ -79,6 +79,26 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     enabled: question?.type === 'PROGRESSIVE_HINTS' && !!session.current_hint_index,
   })
 
+  const isClosed = !session.accepting_answers
+
+  // Poll own answer result after host closes and reviews
+  const { data: reviewResult } = useQuery<{ is_correct: boolean | null; points_awarded: number } | null>({
+    queryKey: ['my_answer', session.current_question_id, isClosed],
+    queryFn: async () => {
+      const playerId = localStorage.getItem(PLAYER_SESSION_KEY)
+      const token = localStorage.getItem(PLAYER_TOKEN_KEY)
+      if (!playerId || !token || !session.current_question_id) return null
+      const { data } = await supabase.rpc('get_my_answer', {
+        p_session_player_id: playerId,
+        p_player_token: token,
+        p_question_id: session.current_question_id,
+      })
+      return data ?? null
+    },
+    enabled: isClosed && !!session.current_question_id,
+    refetchInterval: isClosed ? 2000 : false,
+  })
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (submitting || submitted) return
@@ -119,34 +139,14 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     )
   }
 
-  const isClosed = !session.accepting_answers
-
-  // Poll own answer result after host closes and reviews
-  const { data: reviewResult } = useQuery<{ is_correct: boolean | null; points_awarded: number } | null>({
-    queryKey: ['my_answer', session.current_question_id, isClosed],
-    queryFn: async () => {
-      const playerId = localStorage.getItem(PLAYER_SESSION_KEY)
-      const token = localStorage.getItem(PLAYER_TOKEN_KEY)
-      if (!playerId || !token || !session.current_question_id) return null
-      const { data } = await supabase.rpc('get_my_answer', {
-        p_session_player_id: playerId,
-        p_player_token: token,
-        p_question_id: session.current_question_id,
-      })
-      return data ?? null
-    },
-    enabled: isClosed && !!session.current_question_id,
-    refetchInterval: isClosed ? 2000 : false,
-  })
-
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* Score bar */}
       <div className="bg-indigo-600 px-4 py-2 flex items-center justify-between text-sm font-semibold text-white">
         <span>{myPlayer.display_name} · Score: {myPlayer.score}</span>
-        {totalQuestions > 0 && (
-          <span className="text-indigo-200">Q{questionNumber}/{totalQuestions}</span>
-        )}
+        <span className="text-indigo-200">
+          Q{question?.position ?? questionNumber}{totalQuestions > 0 ? `/${totalQuestions}` : ''}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center p-4">
@@ -206,7 +206,11 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
               <p className="text-gray-700 dark:text-gray-200 font-semibold">
                 ✓ Answer submitted
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">You can update your answer until the host closes the question</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {question?.type === 'PROGRESSIVE_HINTS'
+                  ? 'You can update your answer when the next hint is revealed'
+                  : 'You can update your answer until the host closes the question'}
+              </p>
             </Card>
           )}
 

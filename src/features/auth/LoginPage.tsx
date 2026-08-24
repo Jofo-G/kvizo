@@ -37,7 +37,12 @@ export function LoginPage() {
         navigate('/dashboard')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      const msg = err instanceof Error ? err.message : 'Something went wrong'
+      if (msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('too many')) {
+        setError('Email rate limit reached. In Supabase Dashboard → Authentication → Providers → Email, disable "Confirm email" to fix this for a private app.')
+      } else {
+        setError(msg)
+      }
     } finally {
       setLoading(false)
     }

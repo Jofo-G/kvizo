@@ -72,6 +72,16 @@ export function PlayerSessionView({ sessionId }: Props) {
     enabled: !isJoined,
   })
 
+  const { data: questions } = useQuery({
+    queryKey: ['questions', session?.quiz_id],
+    queryFn: () => fetchQuestions(session!.quiz_id),
+    enabled: !!session?.quiz_id,
+  })
+
+  const currentQuestionIndex = questions?.findIndex(
+    (q) => q.id === session?.current_question_id,
+  ) ?? -1
+
   const activePlayers: SessionPlayer[] = players
 
   async function handleJoinExisting(profile: PlayerProfile) {
@@ -204,16 +214,6 @@ export function PlayerSessionView({ sessionId }: Props) {
       </div>
     )
   }
-
-  const { data: questions } = useQuery({
-    queryKey: ['questions', session?.quiz_id],
-    queryFn: () => fetchQuestions(session!.quiz_id),
-    enabled: !!session?.quiz_id,
-  })
-
-  const currentQuestionIndex = questions?.findIndex(
-    (q) => q.id === session?.current_question_id,
-  ) ?? -1
 
   // Running
   return (

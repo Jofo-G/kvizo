@@ -63,12 +63,17 @@ export function HostSessionPage() {
     (session?.current_hint_index ?? 0) >= (currentHints?.length ?? 0)
 
   const [overrideLoading, setOverrideLoading] = useState<Record<string, 'approve' | 'reject' | null>>({})
+  const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, boolean>>({})
 
   async function handleOverride(answer: Answer, correct: boolean) {
+    setOptimisticOverrides((prev) => ({ ...prev, [answer.id]: correct }))
     setOverrideLoading((prev) => ({ ...prev, [answer.id]: correct ? 'approve' : 'reject' }))
     try {
       await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
       await refreshLeaderboard()
+      setOptimisticOverrides((prev) => { const n = { ...prev }; delete n[answer.id]; return n })
+    } catch {
+      setOptimisticOverrides((prev) => { const n = { ...prev }; delete n[answer.id]; return n })
     } finally {
       setOverrideLoading((prev) => ({ ...prev, [answer.id]: null }))
     }
@@ -218,15 +223,54 @@ export function HostSessionPage() {
                 <div className="flex flex-col gap-2">
                   {currentAnswers?.map((a) => {
                     const player = players.find((p) => p.id === a.session_player_id)
+                    const effective = a.id in optimisticOverrides ? optimisticOverrides[a.id] : a.is_correct
                     return (
                       <div
                         key={a.id}
-                        className={`flex items-center justify-between rounded-lg px-4 py-3 ${
-                          a.is_correct === true ? 'bg-green-900/40' :
-                          a.is_correct === false ? 'bg-red-900/30' :
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${
+                          effective === true ? 'bg-green-900/40' :
+                          effective === false ? 'bg-red-900/30' :
                           'bg-gray-700'
                         }`}
                       >
+                        <div>
+                          <span className="font-semibold text-white">{player?.display_name}</span>
+                          <p className="text-sm text-gray-300 mt-0.5">
+                            {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
+                          </p>
+                          {a.hint_index_at_submission != null && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 items-center shrink-0 ml-4">
+                          <button
+                            onClick={() => handleOverride(a, true)}
+                            disabled={!!overrideLoading[a.id]}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
+                              effective === true
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-600 text-gray-300 hover:bg-green-700 hover:text-white'
+                            }`}
+                          >
+                            {overrideLoading[a.id] === 'approve' ? '…' : `✓ ${effective === true ? `${a.points_awarded}pts` : 'Approve'}`}
+                          </button>
+                          <button
+                            onClick={() => handleOverride(a, false)}
+                            disabled={!!overrideLoading[a.id]}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
+                              effective === false
+                                ? 'bg-red-500 text-white'
+                                : 'bg-gray-600 text-gray-300 hover:bg-red-700 hover:text-white'
+                            }`}
+                          >
+                            {overrideLoading[a.id] === 'reject' ? '…' : '✕ Reject'}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                         <div>
                           <span className="font-semibold text-white">{player?.display_name}</span>
                           <p className="text-sm text-gray-300 mt-0.5">
