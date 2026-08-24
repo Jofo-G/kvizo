@@ -86,6 +86,57 @@ export async function deleteQuestion(questionId: string): Promise<void> {
   if (error) throw error
 }
 
+export async function bulkCreateQuestions(
+  quizId: string,
+  startPosition: number,
+  count: number,
+  type: Question['type'],
+  hintPoints: number[],   // for PROGRESSIVE_HINTS: points per hint position
+  defaultPoints: number,  // for MULTIPLE_CHOICE / OPEN
+  optionCount: number,    // for MULTIPLE_CHOICE
+): Promise<void> {
+  // Create all questions in one insert
+  const { data: questions, error: qErr } = await supabase
+    .from('questions')
+    .insert(
+      Array.from({ length: count }, (_, i) => ({
+        quiz_id: quizId,
+        position: startPosition + i,
+        type,
+        default_points: type !== 'PROGRESSIVE_HINTS' ? defaultPoints : null,
+      })),
+    )
+    .select()
+  if (qErr) throw qErr
+
+  // Create hints or blank options for each question
+  if (type === 'PROGRESSIVE_HINTS' && hintPoints.length > 0) {
+    const hintRows = (questions as Question[]).flatMap((q) =>
+      hintPoints.map((pts, idx) => ({
+        question_id: q.id,
+        position: idx + 1,
+        text: '',
+        points: pts,
+      })),
+    )
+    const { error } = await supabase.from('question_hints').insert(hintRows)
+    if (error) throw error
+  }
+
+  if (type === 'MULTIPLE_CHOICE' && optionCount > 0) {
+    const optionRows = (questions as Question[]).flatMap((q) =>
+      Array.from({ length: optionCount }, (_, i) => ({
+        question_id: q.id,
+        position: i + 1,
+        text: '',
+        is_correct: false,
+      })),
+    )
+    const { error } = await supabase.from('question_options').insert(optionRows)
+    if (error) throw error
+  }
+}
+
 // ── Question options ───────────────────────────────────────
 
 export async function fetchOptions(questionId: string): Promise<QuestionOption[]> {

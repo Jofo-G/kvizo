@@ -69,16 +69,33 @@ export function QuizDetailsPage() {
                       {formatDate(s.created_at)}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Status: {s.status}
+                      Status:{' '}
+                      <span className={
+                        s.status === 'RUNNING' ? 'text-green-600 font-semibold' :
+                        s.status === 'LOBBY' ? 'text-yellow-600 font-semibold' :
+                        'text-gray-500'
+                      }>
+                        {s.status}
+                      </span>
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => navigate(`/sessions/${s.id}/results`)}
-                  >
-                    View
-                  </Button>
+                  <div className="flex gap-2">
+                    {(s.status === 'LOBBY' || s.status === 'RUNNING') && (
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/sessions/${s.id}/host`)}
+                      >
+                        Resume host
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => navigate(`/sessions/${s.id}/results`)}
+                    >
+                      Results
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>

@@ -35,6 +35,7 @@ export function QuestionEditor({
   isLast,
 }: Props) {
   const qc = useQueryClient()
+  const [collapsed, setCollapsed] = useState(true)
   const [text, setText] = useState(question.text ?? '')
   const [defaultPoints, setDefaultPoints] = useState(question.default_points ?? 1)
   const [saving, setSaving] = useState(false)
@@ -80,6 +81,7 @@ export function QuestionEditor({
         await upsertHints(question.id, hints)
       }
       qc.invalidateQueries({ queryKey: ['questions', quizId] })
+      setCollapsed(true)
     } finally {
       setSaving(false)
     }
@@ -95,12 +97,16 @@ export function QuestionEditor({
 
   return (
     <Card className="flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header – click to expand/collapse */}
+      <div
+        className="flex items-center justify-between cursor-pointer"
+        onClick={() => setCollapsed((c) => !c)}
+      >
         <span className="text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
           {question.type.replace('_', ' ')} — Q{question.position}
+          {question.text ? ` · ${question.text}` : ''}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           <button disabled={isFirst} onClick={onMoveUp} className="p-1 disabled:opacity-30">
             <ChevronUp className="h-4 w-4" />
           </button>
@@ -118,6 +124,8 @@ export function QuestionEditor({
         </div>
       </div>
 
+      {!collapsed && (
+        <>
       <Input
         label="Question label (short text, shown in app)"
         value={text}
@@ -243,6 +251,8 @@ export function QuestionEditor({
       <Button size="sm" onClick={save} disabled={saving}>
         {saving ? 'Saving…' : 'Save question'}
       </Button>
+        </>
+      )}
     </Card>
   )
 }

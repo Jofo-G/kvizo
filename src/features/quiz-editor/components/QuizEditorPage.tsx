@@ -13,6 +13,7 @@ import { useQuiz, useUpdateQuiz } from '../../quizzes/hooks/useQuizzes'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
+import { BulkAddPanel } from './BulkAddPanel'
 import { useNavigate, useParams } from 'react-router-dom'
 import { QuestionEditor } from './QuestionEditor'
 
@@ -146,9 +147,11 @@ export function QuizEditorPage() {
         </div>
 
         {/* Add question */}
+        <BulkAddPanel quizId={quizId!} nextPosition={(questions?.length ?? 0) + 1} />
+
         <Card>
           <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Add a question
+            Add a single question
           </p>
           <div className="flex flex-wrap gap-2">
             {QUESTION_TYPES.map((t) => (
