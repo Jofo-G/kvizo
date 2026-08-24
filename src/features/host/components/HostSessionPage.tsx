@@ -133,7 +133,9 @@ export function HostSessionPage() {
                   </p>
                   {isProgressiveHints && (
                     <p className="text-sm text-indigo-400 mt-1">
-                      Current hint: {session.current_hint_index}
+                      {session.current_hint_index === 0
+                        ? 'No hint shown yet (max points)'
+                        : `Hint ${session.current_hint_index} shown`}
                     </p>
                   )}
                   <p className="text-sm text-gray-400 mt-1">
@@ -144,7 +146,7 @@ export function HostSessionPage() {
                 <div className="flex flex-col gap-3">
                   {isProgressiveHints && session.accepting_answers && (
                     <Button variant="secondary" size="lg" onClick={revealNextHint}>
-                      REVEAL NEXT HINT
+                      REVEAL HINT {(session.current_hint_index ?? 0) + 1}
                     </Button>
                   )}
                   {session.accepting_answers && (

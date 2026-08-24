@@ -53,7 +53,7 @@ export function useHostSession(sessionId: string) {
       status: 'RUNNING',
       started_at: new Date().toISOString(),
       current_question_id: firstQuestionId,
-      current_hint_index: 1,
+      current_hint_index: 0,
       accepting_answers: true,
     })
     await broadcastEvent(sessionId, { type: 'SESSION_STARTED' })
@@ -64,7 +64,7 @@ export function useHostSession(sessionId: string) {
   async function startQuestion(questionId: string) {
     await updateSession(sessionId, {
       current_question_id: questionId,
-      current_hint_index: 1,
+      current_hint_index: 0,
       accepting_answers: true,
     })
     await broadcastEvent(sessionId, { type: 'QUESTION_STARTED', questionId })

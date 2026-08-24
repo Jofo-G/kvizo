@@ -20,13 +20,21 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, submitResu
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  // Reset on new question
+  // Reset everything on new question
   useEffect(() => {
     setSelectedOptionId(null)
     setOpenText('')
     setSubmitted(false)
     setSubmitError('')
   }, [session.current_question_id])
+
+  // Allow re-answer when a new hint is revealed
+  useEffect(() => {
+    if (session.current_hint_index !== undefined && session.current_hint_index !== null) {
+      setSubmitted(false)
+      setSubmitError('')
+    }
+  }, [session.current_hint_index])
 
   const { data: question } = useQuery({
     queryKey: ['question', session.current_question_id],
@@ -122,29 +130,47 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, submitResu
           )}
 
           {/* Progressive hint */}
-          {question.type === 'PROGRESSIVE_HINTS' && currentHint && (
+          {question.type === 'PROGRESSIVE_HINTS' && (
             <Card className="border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 dark:border-indigo-700">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 mb-1">
-                Hint {session.current_hint_index} · {currentHint.points} pts
-              </p>
-              <p className="text-gray-800 dark:text-gray-200">{currentHint.text}</p>
+              {currentHint ? (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 mb-1">
+                    Hint {session.current_hint_index} · {currentHint.points} pts if correct now
+                  </p>
+                  <p className="text-gray-800 dark:text-gray-200">{currentHint.text}</p>
+                </>
+              ) : (
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                  No hint yet — answer now for maximum points
+                </p>
+              )}
             </Card>
           )}
 
-          {/* Closed notice */}
+          {/* Closed + result */}
           {isClosed && (
-            <Card className="bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700 text-center">
-              <p className="text-amber-700 dark:text-amber-400 font-semibold">
-                Answers closed
-              </p>
+            <Card className={`text-center ${
+              submitResult
+                ? submitResult.is_correct
+                  ? 'bg-green-50 border-green-400 dark:bg-green-950/40 dark:border-green-600'
+                  : 'bg-red-50 border-red-400 dark:bg-red-950/40 dark:border-red-600'
+                : 'bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700'
+            }`}>
+              {submitResult ? (
+                <p className={`text-xl font-bold ${submitResult.is_correct ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                  {submitResult.is_correct ? `✓ Correct! +${submitResult.points_awarded} points` : '✕ Incorrect'}
+                </p>
+              ) : (
+                <p className="text-amber-700 dark:text-amber-400 font-semibold">Answers closed — no answer submitted</p>
+              )}
             </Card>
           )}
 
-          {/* Result */}
-          {submitted && submitResult && (
-            <Card className={`text-center ${submitResult.is_correct ? 'bg-green-50 border-green-400 dark:bg-green-950/40' : 'bg-red-50 border-red-400 dark:bg-red-950/40'}`}>
-              <p className={`text-xl font-bold ${submitResult.is_correct ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-                {submitResult.is_correct ? `✓ +${submitResult.points_awarded} points` : '✕ Incorrect'}
+          {/* Submitted confirmation while still open */}
+          {submitted && !isClosed && (
+            <Card className={`text-center ${submitResult?.is_correct ? 'bg-green-50 border-green-400 dark:bg-green-950/40' : 'bg-red-50 border-red-400 dark:bg-red-950/40'}`}>
+              <p className={`text-lg font-bold ${submitResult?.is_correct ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {submitResult?.is_correct ? `✓ Correct! +${submitResult.points_awarded} pts` : '✕ Wrong — wait for next hint or try again when revealed'}
               </p>
             </Card>
           )}
