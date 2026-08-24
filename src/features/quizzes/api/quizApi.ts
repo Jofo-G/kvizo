@@ -23,13 +23,10 @@ export async function fetchQuiz(quizId: string): Promise<Quiz> {
 }
 
 export async function createQuiz(name: string, description?: string): Promise<Quiz> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-  const { data, error } = await supabase
-    .from('quizzes')
-    .insert({ name, description, owner_user_id: user.id })
-    .select()
-    .single()
+  const { data, error } = await supabase.rpc('create_quiz', {
+    p_name: name,
+    p_description: description ?? null,
+  })
   if (error) throw error
   return data as Quiz
 }

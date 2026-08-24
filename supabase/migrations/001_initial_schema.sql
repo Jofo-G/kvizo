@@ -586,8 +586,52 @@ end;
 $$;
 
 -- ============================================================
+-- Grants (RLS restricts rows; grants allow table access at all)
+-- ============================================================
+grant select, insert, update, delete on public.quizzes           to authenticated;
+grant select, insert, update, delete on public.quiz_members      to authenticated;
+grant select, insert, update, delete on public.questions         to authenticated;
+grant select, insert, update, delete on public.question_options  to authenticated;
+grant select, insert, update, delete on public.accepted_answers  to authenticated;
+grant select, insert, update, delete on public.question_hints    to authenticated;
+grant select, insert, update, delete on public.quiz_sessions     to authenticated;
+grant select, insert, update, delete on public.session_players   to authenticated;
+grant select, insert, update, delete on public.answers           to authenticated;
+grant select, insert               on public.player_profiles     to authenticated;
+
+grant select         on public.quiz_sessions    to anon;
+grant select         on public.session_players  to anon;
+grant select, insert on public.player_profiles  to anon;
+
+grant select on public.question_options_safe to anon, authenticated;
+
+-- ============================================================
 -- Helper view: safe question options for players (no is_correct)
 -- ============================================================
 create view public.question_options_safe as
   select id, question_id, position, text
   from public.question_options;
+
+-- ============================================================
+-- RPC: create_quiz
+-- Security definer so auth.uid() is always resolved correctly
+-- ============================================================
+create or replace function public.create_quiz(
+  p_name        text,
+  p_description text default null
+)
+returns public.quizzes language plpgsql security definer as $$
+declare
+  v_quiz public.quizzes;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  insert into public.quizzes (owner_user_id, name, description)
+  values (auth.uid(), p_name, p_description)
+  returning * into v_quiz;
+
+  return v_quiz;
+end;
+$$;

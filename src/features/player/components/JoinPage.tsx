@@ -1,22 +1,28 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchSessionByCode } from '../../quizzes/api/quizApi'
 
 export function JoinPage() {
   const navigate = useNavigate()
-  const [code, setCode] = useState('')
+  const [searchParams] = useSearchParams()
+  const [code, setCode] = useState(searchParams.get('code') ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleJoin(e: React.FormEvent) {
-    e.preventDefault()
+  // Auto-submit if code came from QR link
+  useEffect(() => {
+    const qrCode = searchParams.get('code')
+    if (qrCode) handleJoinWithCode(qrCode)
+  }, [])
+
+  async function handleJoinWithCode(c: string) {
     setError('')
     setLoading(true)
     try {
-      const session = await fetchSessionByCode(code.trim())
+      const session = await fetchSessionByCode(c.trim())
       if (!session) {
         setError('Room not found. Check the code and try again.')
         return
@@ -31,6 +37,11 @@ export function JoinPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleJoin(e: React.FormEvent) {
+    e.preventDefault()
+    await handleJoinWithCode(code)
   }
 
   return (

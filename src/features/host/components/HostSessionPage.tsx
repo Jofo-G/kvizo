@@ -8,6 +8,7 @@ import {
 import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'
 import type { Answer, Question } from '@/shared/types'
+import { QRCodeSVG } from 'qrcode.react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Users } from 'lucide-react'
@@ -81,6 +82,17 @@ export function HostSessionPage() {
         {isLobby && (
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <h2 className="text-xl font-bold text-white mb-4">Waiting for players…</h2>
+
+            {/* QR code + join URL */}
+            <div className="flex flex-col items-center gap-3 mb-6 p-4 rounded-xl bg-white">
+              <QRCodeSVG
+                value={`${window.location.origin}/join?code=${session.join_code}`}
+                size={180}
+                includeMargin
+              />
+              <p className="text-sm text-gray-500 font-mono">{window.location.origin}/join</p>
+            </div>
+
             <div className="flex flex-wrap gap-2 mb-6">
               {players.map((p) => (
                 <span

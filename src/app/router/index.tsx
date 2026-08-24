@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider } from '../../features/auth/AuthProvider'
 import { LoginPage } from '../../features/auth/LoginPage'
 import { ProtectedRoute } from '../../features/auth/ProtectedRoute'
@@ -10,6 +11,17 @@ import { PlayPage } from '../../features/player/components/PlayPage'
 import { QuizEditorPage } from '../../features/quiz-editor/components/QuizEditorPage'
 import { DashboardPage } from '../../features/quizzes/components/DashboardPage'
 import { QuizDetailsPage } from '../../features/quizzes/components/QuizDetailsPage'
+
+function AuthCallbackPage() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    // Supabase JS picks up the session from the URL hash automatically.
+    // Just redirect to the dashboard after a tick.
+    const t = setTimeout(() => navigate('/dashboard', { replace: true }), 100)
+    return () => clearTimeout(t)
+  }, [navigate])
+  return null
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +85,9 @@ export function AppRouter() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Magic link callback — Supabase sets session from URL hash, then redirect */}
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/join" replace />} />
