@@ -10,10 +10,9 @@ interface Props {
   session: QuizSession
   myPlayer: SessionPlayer
   submitAnswer: (params: { questionId: string; answerText?: string; selectedOptionId?: string }) => Promise<void>
-  submitResult: { is_correct: boolean; points_awarded: number } | null
 }
 
-export function PlayerQuestionView({ session, myPlayer, submitAnswer, submitResult }: Props) {
+export function PlayerQuestionView({ session, myPlayer, submitAnswer }: Props) {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [openText, setOpenText] = useState('')
   const [submitting, setSubmitting] = useState(false)

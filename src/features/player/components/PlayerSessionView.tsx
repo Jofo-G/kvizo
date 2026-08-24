@@ -39,7 +39,6 @@ export function PlayerSessionView({ sessionId }: Props) {
     myPlayer,
     loading,
     isJoined,
-    submitResult,
     joinSession,
     submitAnswer,
   } = usePlayerSession(sessionId)
@@ -187,7 +186,6 @@ export function PlayerSessionView({ sessionId }: Props) {
       session={session}
       myPlayer={myPlayer!}
       submitAnswer={submitAnswer}
-      submitResult={submitResult}
     />
   )
 }
