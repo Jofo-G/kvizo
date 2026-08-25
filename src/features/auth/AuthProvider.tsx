@@ -36,18 +36,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      const u = data.session?.user ?? null
-      setUser(u)
-      if (u) await fetchAdminStatus(u.id)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // onAuthStateChange fires INITIAL_SESSION on mount — single source of truth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) fetchAdminStatus(u.id)
+      if (u) await fetchAdminStatus(u.id)
       else setIsAdmin(false)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
