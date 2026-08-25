@@ -1,11 +1,11 @@
 import { supabase } from '@/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
 } from 'react'
 
 interface AuthContextValue {
@@ -36,10 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       const u = data.session?.user ?? null
       setUser(u)
-      if (u) fetchAdminStatus(u.id)
+      if (u) await fetchAdminStatus(u.id)
       setLoading(false)
     })
 
