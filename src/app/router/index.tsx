@@ -6,6 +6,7 @@ import { LoginPage } from '../../features/auth/LoginPage'
 import { ProtectedRoute } from '../../features/auth/ProtectedRoute'
 import { AdminRoute } from '../../features/auth/AdminRoute'
 import { SessionResultsPage } from '../../features/history/components/SessionResultsPage'
+import { HostLeaderboardPage } from '../../features/host/components/HostLeaderboardPage'
 import { HostSessionPage } from '../../features/host/components/HostSessionPage'
 import { JoinPage } from '../../features/player/components/JoinPage'
 import { PlayPage } from '../../features/player/components/PlayPage'
@@ -79,6 +80,8 @@ export function AppRouter() {
                 </ProtectedRoute>
               }
             />
+            {/* Public leaderboard display — no auth required */}
+            <Route path="/sessions/:sessionId/leaderboard" element={<HostLeaderboardPage />} />
             <Route
               path="/sessions/:sessionId/results"
               element={

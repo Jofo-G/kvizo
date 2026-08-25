@@ -6,7 +6,6 @@ import {
     fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
-import { HostLeaderboard } from './HostLeaderboard'
 import { supabase } from '@/supabase/client'
 import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
@@ -101,14 +100,24 @@ export function HostSessionPage() {
             <span className="font-mono text-indigo-400">{session.join_code}</span>
           </p>
         </div>
-        <div className="flex items-center gap-2 text-gray-300">
-          <Users className="h-5 w-5" />
-          <span className="text-lg font-semibold">{players.length}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-gray-300">
+            <Users className="h-5 w-5" />
+            <span className="text-lg font-semibold">{players.length}</span>
+          </div>
+          <a
+            href={`/sessions/${sessionId}/leaderboard`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors"
+          >
+            Open Leaderboard ↗
+          </a>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 py-8 flex gap-6 items-start">
-      <main className="flex-1 min-w-0 flex flex-col gap-6">
+      <div className="mx-auto max-w-3xl px-4 py-8">
+      <main className="flex flex-col gap-6">
         {/* LOBBY */}
         {isLobby && (
           <Card className="dark:bg-gray-800 dark:border-gray-700">
@@ -301,11 +310,6 @@ export function HostSessionPage() {
           </Card>
         )}
       </main>
-
-      {/* Persistent leaderboard sidebar */}
-      <aside className="w-80 shrink-0 sticky top-4">
-        <HostLeaderboard players={players} />
-      </aside>
 
       </div>
     </div>
