@@ -272,11 +272,19 @@ export async function updateSession(
 export async function fetchSessionPlayers(sessionId: string): Promise<SessionPlayer[]> {
   const { data, error } = await supabase
     .from('session_players')
-    .select('*')
+    .select('*, player_profiles(avatar_url)')
     .eq('session_id', sessionId)
     .order('score', { ascending: false })
   if (error) throw error
-  return data as SessionPlayer[]
+  return (data ?? []).map((p: any) => ({
+    id: p.id,
+    session_id: p.session_id,
+    player_profile_id: p.player_profile_id,
+    display_name: p.display_name,
+    score: p.score,
+    joined_at: p.joined_at,
+    avatar_url: p.player_profiles?.avatar_url ?? null,
+  })) as SessionPlayer[]
 }
 
 // ── Answers ────────────────────────────────────────────────

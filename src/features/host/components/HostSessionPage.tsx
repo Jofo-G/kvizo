@@ -6,6 +6,7 @@ import {
     fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
+import { HostLeaderboard } from './HostLeaderboard'
 import { supabase } from '@/supabase/client'
 import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
@@ -106,7 +107,8 @@ export function HostSessionPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 flex flex-col gap-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 flex gap-6 items-start">
+      <main className="flex-1 min-w-0 flex flex-col gap-6">
         {/* LOBBY */}
         {isLobby && (
           <Card className="dark:bg-gray-800 dark:border-gray-700">
@@ -275,23 +277,6 @@ export function HostSessionPage() {
               </Card>
             )}
 
-            {/* Leaderboard */}
-            {!session.accepting_answers && players.length > 0 && (
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-3">Leaderboard</h3>
-                <ol className="flex flex-col gap-2">
-                  {[...players]
-                    .sort((a, b) => b.score - a.score)
-                    .map((p, i) => (
-                      <li key={p.id} className="flex items-center justify-between">
-                        <span className="text-gray-300">
-                          {i + 1}. {p.display_name}
-                        </span>
-                        <span className="font-bold text-white">{p.score}</span>
-                      </li>
-                    ))}
-                </ol>
-              </Card>
             )}
           </>
         )}
@@ -318,6 +303,13 @@ export function HostSessionPage() {
           </Card>
         )}
       </main>
+
+      {/* Persistent leaderboard sidebar */}
+      <aside className="w-80 shrink-0 sticky top-4">
+        <HostLeaderboard players={players} />
+      </aside>
+
+      </div>
     </div>
   )
 }

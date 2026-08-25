@@ -100,6 +100,7 @@ export interface SessionPlayer {
   display_name: string
   score: number
   joined_at: string
+  avatar_url: string | null
 }
 
 export interface Answer {
