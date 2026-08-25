@@ -276,8 +276,6 @@ export function HostSessionPage() {
                 </div>
               </Card>
             )}
-
-            )}
           </>
         )}
 
