@@ -86,6 +86,14 @@ export async function deleteQuestion(questionId: string): Promise<void> {
   if (error) throw error
 }
 
+export async function adjustPlayerScore(sessionPlayerId: string, delta: number): Promise<void> {
+  const { error } = await supabase.rpc('adjust_session_player_score', {
+    p_session_player_id: sessionPlayerId,
+    p_delta: delta,
+  })
+  if (error) throw error
+}
+
 export async function bulkCreateQuestions(
   quizId: string,
   startPosition: number,
@@ -94,6 +102,7 @@ export async function bulkCreateQuestions(
   hintPoints: number[],   // for PROGRESSIVE_HINTS: points per hint position
   defaultPoints: number,  // for MULTIPLE_CHOICE / OPEN
   optionCount: number,    // for MULTIPLE_CHOICE
+  namePrefix?: string,    // optional label applied to every question
 ): Promise<void> {
   // Create all questions in one insert
   const { data: questions, error: qErr } = await supabase
@@ -103,7 +112,8 @@ export async function bulkCreateQuestions(
         quiz_id: quizId,
         position: startPosition + i,
         type,
-        default_points: type !== 'PROGRESSIVE_HINTS' ? defaultPoints : null,
+        text: namePrefix ? namePrefix : null,
+        default_points: type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' ? defaultPoints : null,
       })),
     )
     .select()

@@ -48,24 +48,24 @@ export function useHostSession(sessionId: string) {
     }
   }, [sessionId])
 
-  async function startQuiz(firstQuestionId: string) {
+  async function startQuiz(firstQuestionId: string, acceptAnswers = true) {
     await updateSession(sessionId, {
       status: 'RUNNING',
       started_at: new Date().toISOString(),
       current_question_id: firstQuestionId,
       current_hint_index: 0,
-      accepting_answers: true,
+      accepting_answers: acceptAnswers,
     })
     await broadcastEvent(sessionId, { type: 'SESSION_STARTED' })
     await broadcastEvent(sessionId, { type: 'QUESTION_STARTED', questionId: firstQuestionId })
     await reload()
   }
 
-  async function startQuestion(questionId: string) {
+  async function startQuestion(questionId: string, acceptAnswers = true) {
     await updateSession(sessionId, {
       current_question_id: questionId,
       current_hint_index: 0,
-      accepting_answers: true,
+      accepting_answers: acceptAnswers,
     })
     await broadcastEvent(sessionId, { type: 'QUESTION_STARTED', questionId })
     await reload()

@@ -164,6 +164,23 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
             </Card>
           )}
 
+          {/* Follow-up question — no answering, host scores directly */}
+          {question.type === 'FOLLOW_UP' && (
+            <Card className="text-center border-amber-400 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700">
+              <p className="text-base font-bold text-amber-700 dark:text-amber-400 mb-1">
+                ↪ Bonus follow-up
+              </p>
+              <p className="text-sm text-amber-600 dark:text-amber-500">
+                No answer needed — the host will score you directly.
+              </p>
+              {myPlayer.score !== undefined && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                  Current score: {myPlayer.score}
+                </p>
+              )}
+            </Card>
+          )}
+
           {/* Progressive hint */}
           {question.type === 'PROGRESSIVE_HINTS' && (
             <Card className="border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 dark:border-indigo-700">
@@ -183,7 +200,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Closed notice — green immediately if correct, waiting otherwise until host acts */}
-          {isClosed && (
+          {isClosed && question.type !== 'FOLLOW_UP' && (
             <Card className={`text-center ${
               reviewResult?.is_correct === true
                 ? 'bg-green-50 border-green-400 dark:bg-green-950/40 dark:border-green-600'
@@ -207,7 +224,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Submitted confirmation while still open */}
-          {submitted && !isClosed && (
+          {submitted && !isClosed && question.type !== 'FOLLOW_UP' && (
             <Card className="text-center bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
               <p className="text-gray-700 dark:text-gray-200 font-semibold">
                 ✓ Answer submitted
@@ -221,7 +238,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Answer controls */}
-          {!isClosed && !submitted && (
+          {!isClosed && !submitted && question.type !== 'FOLLOW_UP' && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {question.type === 'MULTIPLE_CHOICE' && (
                 <div className="flex flex-col gap-2">

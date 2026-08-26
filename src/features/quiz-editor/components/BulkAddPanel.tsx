@@ -15,6 +15,7 @@ const TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'PROGRESSIVE_HINTS', label: 'Progressive Hints' },
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
   { value: 'OPEN', label: 'Open Answer' },
+  { value: 'FOLLOW_UP', label: 'Follow-up' },
 ]
 
 export function BulkAddPanel({ quizId, nextPosition }: Props) {
@@ -22,6 +23,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<QuestionType>('PROGRESSIVE_HINTS')
   const [count, setCount] = useState(10)
+  const [namePrefix, setNamePrefix] = useState('')
   const [defaultPoints, setDefaultPoints] = useState(1)
   const [optionCount, setOptionCount] = useState(4)
   const [hintPoints, setHintPoints] = useState<number[]>([5, 3, 1])
@@ -48,6 +50,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
         hintPoints,
         defaultPoints,
         optionCount,
+        namePrefix.trim() || undefined,
       )
       qc.invalidateQueries({ queryKey: ['questions', quizId] })
       setDone(true)
@@ -105,6 +108,20 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
               className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            />
+          </div>
+
+          {/* Name prefix — applied to all created questions */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Question name / label <span className="text-gray-400 font-normal">(optional, same for all)</span>
+            </label>
+            <input
+              type="text"
+              value={namePrefix}
+              onChange={(e) => setNamePrefix(e.target.value)}
+              placeholder="e.g. Which zone is this mob from"
+              className="rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -182,8 +199,8 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
             </div>
           )}
 
-          {/* Default points for non-progressive */}
-          {type !== 'PROGRESSIVE_HINTS' && (
+          {/* Default points for non-progressive, non-followup */}
+          {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && (
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
                 Points per correct answer
@@ -196,6 +213,12 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                 className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
+          )}
+
+          {type === 'FOLLOW_UP' && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
+              ↪ Follow-up questions have no answer — host scores each player +1 / 0 / −1 during the session.
+            </p>
           )}
 
           <Button onClick={handleCreate} disabled={loading} className="w-full">

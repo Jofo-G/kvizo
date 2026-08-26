@@ -67,10 +67,13 @@ export function QuestionEditor({
   async function save() {
     setSaving(true)
     try {
-      await updateQuestion(question.id, { text: text || null, default_points: defaultPoints })
+      await updateQuestion(question.id, {
+        text: text || null,
+        default_points: question.type !== 'FOLLOW_UP' ? defaultPoints : null,
+      })
       if (question.type === 'MULTIPLE_CHOICE') {
         await upsertOptions(question.id, options)
-      } else {
+      } else if (question.type === 'OPEN' || question.type === 'PROGRESSIVE_HINTS') {
         const answers = acceptedRaw
           .split('\n')
           .map((l) => l.trim())
@@ -102,8 +105,12 @@ export function QuestionEditor({
         className="flex items-center justify-between cursor-pointer"
         onClick={() => setCollapsed((c) => !c)}
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-          {question.type.replace('_', ' ')} — Q{question.position}
+        <span className={`text-sm font-semibold uppercase tracking-wide ${
+          question.type === 'FOLLOW_UP'
+            ? 'text-amber-500 dark:text-amber-400'
+            : 'text-indigo-600 dark:text-indigo-400'
+        }`}>
+          {question.type === 'FOLLOW_UP' ? '↪ FOLLOW-UP' : question.type.replace('_', ' ')} — Q{question.position}
           {question.text ? ` · ${question.text}` : ''}
         </span>
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -261,6 +268,12 @@ export function QuestionEditor({
       <Button size="sm" onClick={save} disabled={saving}>
         {saving ? 'Saving…' : 'Save question'}
       </Button>
+
+      {question.type === 'FOLLOW_UP' && (
+        <p className="text-xs text-amber-600 dark:text-amber-400 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
+          ↪ Follow-up — no answer needed. During the session the host awards&nbsp;<strong>+1</strong>,&nbsp;<strong>0</strong>, or&nbsp;<strong>−1</strong> to each player manually.
+        </p>
+      )}
         </>
       )}
     </Card>

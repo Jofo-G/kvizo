@@ -2,6 +2,7 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
+    adjustPlayerScore,
     fetchAnswersForQuestion,
     fetchQuestions,
 } from '../../quizzes/api/quizApi'
@@ -65,6 +66,23 @@ export function HostSessionPage() {
   const [overrideLoading, setOverrideLoading] = useState<Record<string, 'approve' | 'reject' | null>>({})
   const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, boolean>>({})
 
+  // follow-up scoring: tracks committed delta per player (-1 / 0 / +1)
+  const [followUpScores, setFollowUpScores] = useState<Record<string, number>>({})
+  const [followUpLoading, setFollowUpLoading] = useState<Record<string, boolean>>({})
+
+  async function handleFollowUpScore(sessionPlayerId: string, newValue: number) {
+    const current = followUpScores[sessionPlayerId] ?? 0
+    const delta = newValue - current
+    if (delta === 0) return
+    setFollowUpLoading((prev) => ({ ...prev, [sessionPlayerId]: true }))
+    try {
+      await adjustPlayerScore(sessionPlayerId, delta)
+      await refreshLeaderboard()
+      setFollowUpScores((prev) => ({ ...prev, [sessionPlayerId]: newValue }))
+    } finally {
+      setFollowUpLoading((prev) => ({ ...prev, [sessionPlayerId]: false }))
+    }
+  }
   async function handleOverride(answer: Answer, correct: boolean) {
     setOptimisticOverrides((prev) => ({ ...prev, [answer.id]: correct }))
     setOverrideLoading((prev) => ({ ...prev, [answer.id]: correct ? 'approve' : 'reject' }))
@@ -88,6 +106,7 @@ export function HostSessionPage() {
   const currentIdx = questions?.findIndex((q) => q.id === session.current_question_id) ?? -1
   const hasNextQuestion = currentIdx < (questions?.length ?? 0) - 1
   const isProgressiveHints = currentQuestion?.type === 'PROGRESSIVE_HINTS'
+  const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -147,7 +166,7 @@ export function HostSessionPage() {
               size="lg"
               className="w-full"
               disabled={players.length === 0 || !questions?.length}
-              onClick={() => startQuiz(questions![0].id)}
+              onClick={() => startQuiz(questions![0].id, questions![0].type !== 'FOLLOW_UP')}
             >
               START QUIZ
             </Button>
@@ -192,7 +211,7 @@ export function HostSessionPage() {
                   {isProgressiveHints && allHintsRevealed && session.accepting_answers && (
                     <p className="text-center text-sm text-gray-400">All hints revealed</p>
                   )}
-                  {session.accepting_answers && (
+                  {session.accepting_answers && !isFollowUp && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
                       CLOSE ANSWERS
                     </Button>
@@ -205,7 +224,10 @@ export function HostSessionPage() {
                       {hasNextQuestion && (
                         <Button
                           size="lg"
-                          onClick={() => startQuestion(questions![currentIdx + 1].id)}
+                          onClick={() => {
+                            const next = questions![currentIdx + 1]
+                            startQuestion(next.id, next.type !== 'FOLLOW_UP')
+                          }}
                         >
                           NEXT QUESTION ({currentIdx + 2}/{questions?.length})
                         </Button>
@@ -225,8 +247,8 @@ export function HostSessionPage() {
               </Card>
             )}
 
-            {/* Answer review — shown for ALL question types after answers close */}
-            {!session.accepting_answers && currentQuestion && (currentAnswers?.length ?? 0) > 0 && (
+            {/* Answer review — shown for non-follow-up types after answers close */}
+            {!session.accepting_answers && currentQuestion && !isFollowUp && (currentAnswers?.length ?? 0) > 0 && (
               <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-3">
                   Answer Review — approve or reject each answer
@@ -278,6 +300,47 @@ export function HostSessionPage() {
                           >
                             {overrideLoading[a.id] === 'reject' ? '…' : '✕ Reject'}
                           </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* Follow-up scoring panel */}
+            {isFollowUp && currentQuestion && (
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-1">
+                  ↪ Follow-up — score each player
+                </h3>
+                <p className="text-xs text-gray-400 mb-4">
+                  Default is 0. Give +1 if they got it right, −1 if wrong.
+                </p>
+                <div className="flex flex-col gap-2">
+                  {players.map((p) => {
+                    const assigned = followUpScores[p.id] ?? 0
+                    const busy = !!followUpLoading[p.id]
+                    return (
+                      <div key={p.id} className="flex items-center justify-between rounded-lg bg-gray-700 px-4 py-3">
+                        <span className="font-semibold text-white">{p.display_name}</span>
+                        <div className="flex gap-1 shrink-0">
+                          {([-1, 0, 1] as const).map((val) => (
+                            <button
+                              key={val}
+                              disabled={busy}
+                              onClick={() => handleFollowUpScore(p.id, val)}
+                              className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-50 ${
+                                assigned === val
+                                  ? val === 1  ? 'bg-green-500 text-white'
+                                  : val === -1 ? 'bg-red-500 text-white'
+                                  :              'bg-gray-500 text-white'
+                                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                              }`}
+                            >
+                              {val === 1 ? '+1' : val === -1 ? '−1' : '0'}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )
