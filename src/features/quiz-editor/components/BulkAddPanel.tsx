@@ -24,6 +24,8 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
   const [type, setType] = useState<QuestionType>('PROGRESSIVE_HINTS')
   const [count, setCount] = useState(10)
   const [namePrefix, setNamePrefix] = useState('')
+  const [withFollowUp, setWithFollowUp] = useState(false)
+  const [followUpNamePrefix, setFollowUpNamePrefix] = useState('')
   const [defaultPoints, setDefaultPoints] = useState(1)
   const [optionCount, setOptionCount] = useState(4)
   const [hintPoints, setHintPoints] = useState<number[]>([5, 3, 1])
@@ -51,6 +53,8 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
         defaultPoints,
         optionCount,
         namePrefix.trim() || undefined,
+        type !== 'FOLLOW_UP' ? withFollowUp : false,
+        followUpNamePrefix.trim() || undefined,
       )
       qc.invalidateQueries({ queryKey: ['questions', quizId] })
       setDone(true)
@@ -124,6 +128,40 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
               className="rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
+
+          {/* Follow-up toggle — hidden when type is already FOLLOW_UP */}
+          {type !== 'FOLLOW_UP' && (
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={withFollowUp}
+                  onChange={(e) => setWithFollowUp(e.target.checked)}
+                  className="h-4 w-4 accent-amber-500"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Add a follow-up after each question
+                </span>
+              </label>
+              {withFollowUp && (
+                <div className="ml-6 flex flex-col gap-1">
+                  <label className="text-sm text-gray-500 dark:text-gray-400">
+                    Follow-up label <span className="font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={followUpNamePrefix}
+                    onChange={(e) => setFollowUpNamePrefix(e.target.value)}
+                    placeholder="e.g. Show where in the zone the mob is"
+                    className="rounded-xl border border-amber-300 px-3 py-1.5 text-sm dark:border-amber-700 dark:bg-gray-800 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Creates {count * 2} questions total — one follow-up after each main question.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Progressive hints config */}
           {type === 'PROGRESSIVE_HINTS' && (
@@ -224,12 +262,12 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           <Button onClick={handleCreate} disabled={loading} className="w-full">
             {loading
               ? 'Creating…'
-              : `Create ${count} ${TYPE_OPTIONS.find((t2) => t2.value === type)?.label} questions`}
+              : `Create ${withFollowUp && type !== 'FOLLOW_UP' ? count * 2 : count} questions${withFollowUp && type !== 'FOLLOW_UP' ? ` (${count} + ${count} follow-ups)` : ''}`}
           </Button>
 
           {done && (
             <p className="text-sm text-green-600 dark:text-green-400 text-center">
-              ✓ {count} questions added
+              ✓ {withFollowUp && type !== 'FOLLOW_UP' ? count * 2 : count} questions added
             </p>
           )}
         </div>

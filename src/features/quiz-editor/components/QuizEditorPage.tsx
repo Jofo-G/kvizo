@@ -38,6 +38,8 @@ export function QuizEditorPage() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [editingMeta, setEditingMeta] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Init local state from loaded quiz
   const displayName = quiz?.name ?? ''
@@ -72,6 +74,29 @@ export function QuizEditorPage() {
       updateQuestion(a.id, { position: b.position }),
       updateQuestion(b.id, { position: a.position }),
     ])
+    qc.invalidateQueries({ queryKey: ['questions', quizId] })
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    if (!selectedIds.size) return
+    if (!confirm(`Delete ${selectedIds.size} question(s)?`)) return
+    await Promise.all([...selectedIds].map((id) => deleteQuestion(id)))
+    const remaining = (questions ?? []).filter((q) => !selectedIds.has(q.id))
+    await Promise.all(
+      remaining.map((q, i) =>
+        q.position !== i + 1 ? updateQuestion(q.id, { position: i + 1 }) : Promise.resolve(),
+      ),
+    )
+    setSelectedIds(new Set())
+    setSelectMode(false)
     qc.invalidateQueries({ queryKey: ['questions', quizId] })
   }
 
@@ -132,17 +157,64 @@ export function QuizEditorPage() {
 
         {/* Questions */}
         <div className="flex flex-col gap-4">
+          {/* Bulk-delete toolbar */}
+          {(questions?.length ?? 0) > 0 && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => { setSelectMode((s) => !s); setSelectedIds(new Set()) }}
+                className="text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-2"
+              >
+                {selectMode ? 'Cancel' : 'Bulk delete'}
+              </button>
+              {selectMode && (
+                <>
+                  <label className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-indigo-600"
+                      checked={selectedIds.size === questions!.length}
+                      onChange={(e) =>
+                        setSelectedIds(e.target.checked ? new Set(questions!.map((q) => q.id)) : new Set())
+                      }
+                    />
+                    Select all
+                  </label>
+                  <button
+                    type="button"
+                    disabled={selectedIds.size === 0}
+                    onClick={handleBulkDelete}
+                    className="ml-auto rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
+                  >
+                    Delete {selectedIds.size > 0 ? `${selectedIds.size} ` : ''}selected
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
           {questions?.map((q, i) => (
-            <QuestionEditor
-              key={q.id}
-              question={q}
-              quizId={quizId!}
-              onDelete={() => handleDeleteQuestion(q)}
-              onMoveUp={() => swapPositions(q, questions[i - 1])}
-              onMoveDown={() => swapPositions(q, questions[i + 1])}
-              isFirst={i === 0}
-              isLast={i === (questions?.length ?? 1) - 1}
-            />
+            <div key={q.id} className="flex items-start gap-2">
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(q.id)}
+                  onChange={() => toggleSelect(q.id)}
+                  className="mt-4 h-4 w-4 shrink-0 accent-indigo-600"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <QuestionEditor
+                  question={q}
+                  quizId={quizId!}
+                  onDelete={() => handleDeleteQuestion(q)}
+                  onMoveUp={() => swapPositions(q, questions[i - 1])}
+                  onMoveDown={() => swapPositions(q, questions[i + 1])}
+                  isFirst={i === 0}
+                  isLast={i === (questions?.length ?? 1) - 1}
+                />
+              </div>
+            </div>
           ))}
         </div>
 

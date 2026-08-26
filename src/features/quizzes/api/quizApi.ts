@@ -99,27 +99,30 @@ export async function bulkCreateQuestions(
   startPosition: number,
   count: number,
   type: Question['type'],
-  hintPoints: number[],   // for PROGRESSIVE_HINTS: points per hint position
-  defaultPoints: number,  // for MULTIPLE_CHOICE / OPEN
-  optionCount: number,    // for MULTIPLE_CHOICE
-  namePrefix?: string,    // optional label applied to every question
+  hintPoints: number[],       // for PROGRESSIVE_HINTS: points per hint position
+  defaultPoints: number,      // for MULTIPLE_CHOICE / OPEN
+  optionCount: number,        // for MULTIPLE_CHOICE
+  namePrefix?: string,        // optional label applied to every main question
+  withFollowUp?: boolean,     // interleave a FOLLOW_UP after each question
+  followUpNamePrefix?: string, // optional label for follow-up questions
 ): Promise<void> {
-  // Create all questions in one insert
+  // Each slot is 1 position wide normally, 2 wide when follow-ups are interleaved
+  const stride = withFollowUp ? 2 : 1
+
   const { data: questions, error: qErr } = await supabase
     .from('questions')
     .insert(
       Array.from({ length: count }, (_, i) => ({
         quiz_id: quizId,
-        position: startPosition + i,
+        position: startPosition + i * stride,
         type,
-        text: namePrefix ? namePrefix : null,
+        text: namePrefix ?? null,
         default_points: type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' ? defaultPoints : null,
       })),
     )
     .select()
   if (qErr) throw qErr
 
-  // Create hints or blank options for each question
   if (type === 'PROGRESSIVE_HINTS' && hintPoints.length > 0) {
     const hintRows = (questions as Question[]).flatMap((q) =>
       hintPoints.map((pts, idx) => ({
@@ -144,6 +147,21 @@ export async function bulkCreateQuestions(
     )
     const { error } = await supabase.from('question_options').insert(optionRows)
     if (error) throw error
+  }
+
+  if (withFollowUp) {
+    const { error: fuErr } = await supabase
+      .from('questions')
+      .insert(
+        Array.from({ length: count }, (_, i) => ({
+          quiz_id: quizId,
+          position: startPosition + i * stride + 1,
+          type: 'FOLLOW_UP' as Question['type'],
+          text: followUpNamePrefix ?? null,
+          default_points: null,
+        })),
+      )
+    if (fuErr) throw fuErr
   }
 }
 
