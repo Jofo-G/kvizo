@@ -36,7 +36,7 @@ export function DashboardPage() {
             className="text-xl font-black tracking-[0.15em] text-[#f0c040]"
             style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 12px rgba(200,168,75,0.4)' }}
           >
-            ⚔ KVIZO
+            KVIZO
           </h1>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#6b5e42]">{user?.email}</span>

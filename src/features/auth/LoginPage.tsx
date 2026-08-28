@@ -87,7 +87,7 @@ export function LoginPage() {
           className="text-5xl font-black tracking-[0.2em] text-[#f0c040]"
           style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 25px rgba(200,168,75,0.6), 0 2px 4px rgba(0,0,0,0.8)' }}
         >
-          ⚔ KVIZO ⚔
+          KVIZO
         </h1>
         <p className="mt-2 text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Enter the Realm</p>
       </div>

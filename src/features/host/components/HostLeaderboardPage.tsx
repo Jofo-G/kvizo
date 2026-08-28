@@ -15,8 +15,13 @@ export function HostLeaderboardPage() {
   const isFinished = session.status === 'FINISHED'
 
   return (
-    <div className="min-h-screen bg-wow-bg text-[#e8d5a0] flex flex-col">
-      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] px-8 py-5 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
+    <div
+      className="relative min-h-screen text-[#e8d5a0] flex flex-col"
+      style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
+      <div className="absolute inset-0 bg-[#080a10]/75" />
+      <div className="relative z-10 flex flex-col min-h-screen">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18]/90 backdrop-blur-sm px-8 py-5 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <p className="text-3xl font-bold tracking-wide" style={{ fontFamily: 'Cinzel, serif' }}>
           ROOM:{' '}
           <span className="font-mono text-[#f0c040]" style={{ textShadow: '0 0 10px rgba(200,168,75,0.5)' }}>{session.join_code}</span>
@@ -92,6 +97,7 @@ export function HostLeaderboardPage() {
             ))}
           </ol>
         )}
+      </div>
       </div>
     </div>
   )

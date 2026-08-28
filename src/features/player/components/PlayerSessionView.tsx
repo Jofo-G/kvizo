@@ -96,7 +96,7 @@ export function PlayerSessionView({ sessionId }: Props) {
             className="text-3xl font-black tracking-[0.15em] text-[#f0c040] mb-1"
             style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 15px rgba(200,168,75,0.5)' }}
           >
-            ⚔ KVIZO ⚔
+            KVIZO
           </h1>
           <p className="text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Choose your champion</p>
         </div>

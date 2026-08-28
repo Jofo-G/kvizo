@@ -2,9 +2,9 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
-  adjustPlayerScore,
-  fetchAnswersForQuestion,
-  fetchQuestions,
+    adjustPlayerScore,
+    fetchAnswersForQuestion,
+    fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'
@@ -109,9 +109,14 @@ export function HostSessionPage() {
   const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
 
   return (
-    <div className="min-h-screen bg-wow-bg text-[#e8d5a0]">
+    <div
+      className="relative min-h-screen text-[#e8d5a0]"
+      style={isLobby ? { backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' } : { background: '#080a10' }}
+    >
+      {isLobby && <div className="absolute inset-0 bg-[#080a10]/75" />}
+      <div className="relative z-10 flex flex-col min-h-screen">
       {/* Header */}
-      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
+      <header className={`border-b border-[#7a5c1c] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)] ${isLobby ? 'bg-[#0c0f18]/90 backdrop-blur-sm' : 'bg-[#0c0f18]'}`}>
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-[#9d8a5e]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
           <p className="text-2xl font-bold" style={{ fontFamily: 'Cinzel, serif' }}>
@@ -371,6 +376,7 @@ export function HostSessionPage() {
         )}
       </main>
 
+      </div>
       </div>
     </div>
   )
