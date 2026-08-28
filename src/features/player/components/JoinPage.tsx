@@ -46,9 +46,16 @@ export function JoinPage() {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4"
-      style={{ background: 'radial-gradient(ellipse at center top, rgba(60,120,200,0.06) 0%, #080a10 65%)' }}
+      className="relative flex min-h-screen flex-col items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url(/bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
+      {/* dark overlay to keep text readable */}
+      <div className="absolute inset-0 bg-[#080a10]/80" />
+      <div className="relative z-10 flex w-full flex-col items-center">
       <div className="mb-8 text-center">
         <h1
           className="text-5xl font-black tracking-[0.2em] text-[#f0c040]"
@@ -92,6 +99,7 @@ export function JoinPage() {
           </p>
         </div>
       </Card>
+      </div>
     </div>
   )
 }

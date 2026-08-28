@@ -71,9 +71,16 @@ export function LoginPage() {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4"
-      style={{ background: 'radial-gradient(ellipse at center top, rgba(100,60,180,0.07) 0%, #080a10 65%)' }}
+      className="relative flex min-h-screen flex-col items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url(/bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
+      {/* dark overlay to keep text readable */}
+      <div className="absolute inset-0 bg-[#080a10]/80" />
+      <div className="relative z-10 flex w-full flex-col items-center">
       {/* WoW-style logo */}
       <div className="mb-8 text-center">
         <h1
@@ -152,6 +159,7 @@ export function LoginPage() {
           </div>
         )}
       </Card>
+      </div>
     </div>
   )
 }

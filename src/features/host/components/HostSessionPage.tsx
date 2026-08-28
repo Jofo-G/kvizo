@@ -2,9 +2,9 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
-    adjustPlayerScore,
-    fetchAnswersForQuestion,
-    fetchQuestions,
+  adjustPlayerScore,
+  fetchAnswersForQuestion,
+  fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'
@@ -218,9 +218,6 @@ export function HostSessionPage() {
                   )}
                   {!session.accepting_answers && (
                     <>
-                      <Button variant="secondary" size="lg" onClick={refreshLeaderboard}>
-                        SHOW SCOREBOARD
-                      </Button>
                       {hasNextQuestion && (
                         <Button
                           size="lg"
