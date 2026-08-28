@@ -87,7 +87,7 @@ export function JoinPage() {
           />
           {error && <p className="text-sm text-red-400 text-center">{error}</p>}
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
-            {loading ? 'Seeking…' : 'Join the Battle'}
+            {loading ? 'Seeking…' : 'Join the Table'}
           </Button>
         </form>
         <div className="mt-6 border-t border-[#7a5c1c] pt-4">
