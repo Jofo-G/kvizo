@@ -86,23 +86,22 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+    <div className="min-h-screen bg-wow-bg">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
           <Link
             to="/dashboard"
-            className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+            className="text-sm text-[#c8a84b] hover:text-[#f0c040] transition-colors"
           >
             ← Dashboard
           </Link>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Manage Players</h1>
+          <h1 className="text-xl font-bold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>Manage Players</h1>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
-        {/* ── Create new player ── */}
         <Card className="mb-8">
-          <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Add New Player</h2>
+          <h2 className="mb-4 text-lg font-bold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>Add New Player</h2>
           <form onSubmit={handleCreate} className="flex flex-col gap-4">
             <Input
               label="Player name"
@@ -113,7 +112,7 @@ export function AdminUsersPage() {
             />
 
             <div>
-              <p className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <p className="mb-1 block text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">
                 Avatar picture
               </p>
               <div className="flex items-center gap-4">
@@ -121,10 +120,10 @@ export function AdminUsersPage() {
                   <img
                     src={avatarPreview}
                     alt="Preview"
-                    className="h-16 w-16 rounded-full object-cover border-2 border-indigo-400"
+                    className="h-16 w-16 rounded-full object-cover border-2 border-[#c8a84b]"
                   />
                 ) : (
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-2xl text-gray-400 dark:bg-gray-700">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#10131e] text-2xl text-[#6b5e42] border-2 border-[#7a5c1c]">
                     ?
                   </div>
                 )}
@@ -140,7 +139,7 @@ export function AdminUsersPage() {
                   <button
                     type="button"
                     onClick={() => { setAvatarFile(null); setAvatarPreview(null) }}
-                    className="text-sm text-red-500 hover:underline"
+                    className="text-sm text-red-400 hover:underline transition-colors"
                   >
                     Remove
                   </button>
@@ -156,7 +155,7 @@ export function AdminUsersPage() {
             </div>
 
             {createMutation.error && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-red-400">
                 {createMutation.error instanceof Error
                   ? createMutation.error.message
                   : 'Failed to create player'}
@@ -173,15 +172,14 @@ export function AdminUsersPage() {
           </form>
         </Card>
 
-        {/* ── Player list ── */}
-        <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+        <h2 className="mb-4 text-lg font-bold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>
           All Players {profiles && `(${profiles.length})`}
         </h2>
 
         {isLoading ? (
           <LoadingSpinner />
         ) : profiles?.length === 0 ? (
-          <Card className="py-8 text-center text-gray-500 dark:text-gray-400">
+          <Card className="py-8 text-center text-[#9d8a5e]">
             No players yet. Add one above.
           </Card>
         ) : (
@@ -192,14 +190,14 @@ export function AdminUsersPage() {
                   <img
                     src={p.avatar_url}
                     alt={p.name}
-                    className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                    className="h-20 w-20 rounded-full object-cover border-2 border-[#c8a84b]"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-3xl font-bold text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#10131e] text-3xl font-bold text-[#c8a84b] border-2 border-[#7a5c1c]">
                     {p.name[0]?.toUpperCase()}
                   </div>
                 )}
-                <p className="text-center font-semibold text-gray-900 dark:text-white">
+                <p className="text-center font-semibold text-[#e8d5a0]">
                   {p.name}
                 </p>
                 <button
@@ -207,7 +205,7 @@ export function AdminUsersPage() {
                     if (confirm(`Remove player "${p.name}"?`)) deleteMutation.mutate(p.id)
                   }}
                   disabled={deleteMutation.isPending}
-                  className="mt-1 text-xs text-red-500 hover:underline disabled:opacity-40"
+                  className="mt-1 text-xs text-red-400 hover:underline disabled:opacity-40 transition-colors"
                 >
                   Remove
                 </button>

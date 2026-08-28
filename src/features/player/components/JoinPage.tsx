@@ -45,31 +45,48 @@ export function JoinPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+    <div
+      className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4"
+      style={{ background: 'radial-gradient(ellipse at center top, rgba(60,120,200,0.06) 0%, #080a10 65%)' }}
+    >
+      <div className="mb-8 text-center">
+        <h1
+          className="text-5xl font-black tracking-[0.2em] text-[#f0c040]"
+          style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 25px rgba(200,168,75,0.6), 0 2px 4px rgba(0,0,0,0.8)' }}
+        >
+          ⚔ KVIZO ⚔
+        </h1>
+        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Enter the Arena</p>
+      </div>
+
       <Card className="w-full max-w-sm">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Kvizo</h1>
-        <p className="mb-6 text-gray-500 dark:text-gray-400">Enter your room code to join</p>
+        <p
+          className="mb-6 text-center text-xs uppercase tracking-[0.2em] text-[#9d8a5e]"
+          style={{ fontFamily: 'Cinzel, serif' }}
+        >
+          Enter your room code to join
+        </p>
         <form onSubmit={handleJoin} className="flex flex-col gap-4">
           <Input
             id="code"
-            label="Room code"
+            label="Room Code"
             placeholder="824196"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             inputMode="numeric"
             maxLength={6}
             required
-            className="text-center text-2xl font-mono tracking-widest"
+            className="text-center text-2xl font-mono tracking-[0.4em]"
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-400 text-center">{error}</p>}
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
-            {loading ? 'Looking up…' : 'Join'}
+            {loading ? 'Seeking…' : 'Join the Battle'}
           </Button>
         </form>
-        <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-6 border-t border-[#7a5c1c] pt-4">
+          <p className="text-center text-sm text-[#6b5e42]">
             Quiz host?{' '}
-            <a href="/login" className="text-indigo-600 hover:underline dark:text-indigo-400">
+            <a href="/login" className="text-[#c8a84b] hover:text-[#f0c040] transition-colors">
               Sign in
             </a>
           </p>

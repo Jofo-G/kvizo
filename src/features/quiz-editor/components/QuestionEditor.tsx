@@ -107,24 +107,24 @@ export function QuestionEditor({
       >
         <span className={`text-sm font-semibold uppercase tracking-wide ${
           question.type === 'FOLLOW_UP'
-            ? 'text-amber-500 dark:text-amber-400'
-            : 'text-indigo-600 dark:text-indigo-400'
+            ? 'text-[#f0c040]'
+            : 'text-[#c8a84b]'
         }`}>
           {question.type === 'FOLLOW_UP' ? '↪ FOLLOW-UP' : question.type.replace('_', ' ')} — Q{question.position}
           {question.text ? ` · ${question.text}` : ''}
         </span>
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-          <button disabled={isFirst} onClick={onMoveUp} className="p-1 disabled:opacity-30">
+          <button disabled={isFirst} onClick={onMoveUp} className="p-1 text-[#9d8a5e] hover:text-[#c8a84b] disabled:opacity-30 transition-colors">
             <ChevronUp className="h-4 w-4" />
           </button>
-          <button disabled={isLast} onClick={onMoveDown} className="p-1 disabled:opacity-30">
+          <button disabled={isLast} onClick={onMoveDown} className="p-1 text-[#9d8a5e] hover:text-[#c8a84b] disabled:opacity-30 transition-colors">
             <ChevronDown className="h-4 w-4" />
           </button>
           <button
             onClick={() => {
               if (confirm('Delete this question?')) onDelete()
             }}
-            className="p-1 text-red-500 hover:text-red-700"
+            className="p-1 text-red-600 hover:text-red-400 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -142,7 +142,7 @@ export function QuestionEditor({
 
       {question.type === 'MULTIPLE_CHOICE' && (
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
+          <label className="text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">Options</label>
           {options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
               <input
@@ -153,11 +153,11 @@ export function QuestionEditor({
                   next[i] = { ...next[i], is_correct: e.target.checked }
                   setOptions(next)
                 }}
-                className="h-4 w-4 accent-indigo-600"
+                className="h-4 w-4 accent-[#c8a84b]"
                 title="Mark as correct"
               />
               <input
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                className="flex-1 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
                 placeholder={`Option ${String.fromCharCode(65 + i)}`}
                 value={opt.text}
                 onChange={(e) => {
@@ -168,7 +168,7 @@ export function QuestionEditor({
               />
               <button
                 onClick={() => setOptions(options.filter((_, j) => j !== i))}
-                className="text-red-400 hover:text-red-600"
+                className="text-red-600 hover:text-red-400 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -189,11 +189,11 @@ export function QuestionEditor({
 
       {(question.type === 'OPEN' || question.type === 'PROGRESSIVE_HINTS') && (
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">
             Accepted answers (one per line, case-insensitive)
           </label>
           <textarea
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="w-full rounded border border-[#7a5c1c] bg-[#080a10] px-4 py-2.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
             rows={4}
             value={acceptedRaw}
             onChange={(e) => setAcceptedRaw(e.target.value)}
@@ -224,12 +224,12 @@ export function QuestionEditor({
 
       {question.type === 'PROGRESSIVE_HINTS' && (
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Hints</label>
+          <label className="text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">Hints</label>
           {hints.map((hint, i) => (
             <div key={i} className="flex items-start gap-2">
               <div className="flex flex-col gap-1 flex-1">
                 <input
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className="rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
                   placeholder={`Hint ${i + 1}`}
                   value={hint.text}
                   onChange={(e) => {
@@ -241,7 +241,7 @@ export function QuestionEditor({
                 <input
                   type="number"
                   min={1}
-                  className="w-24 rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className="w-24 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
                   placeholder="Points"
                   value={hint.points}
                   onChange={(e) => {
@@ -253,7 +253,7 @@ export function QuestionEditor({
               </div>
               <button
                 onClick={() => setHints(hints.filter((_, j) => j !== i))}
-                className="mt-1 text-red-400 hover:text-red-600"
+                className="mt-1 text-red-600 hover:text-red-400 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -270,7 +270,7 @@ export function QuestionEditor({
       </Button>
 
       {question.type === 'FOLLOW_UP' && (
-        <p className="text-xs text-amber-600 dark:text-amber-400 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
+        <p className="text-xs text-[#f0c040]/80 rounded border border-[#c8a84b]/30 bg-[#1a1200] px-3 py-2">
           ↪ Follow-up — no answer needed. During the session the host awards&nbsp;<strong>+1</strong>,&nbsp;<strong>0</strong>, or&nbsp;<strong>−1</strong> to each player manually.
         </p>
       )}

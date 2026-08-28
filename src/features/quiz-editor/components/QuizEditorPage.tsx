@@ -103,17 +103,17 @@ export function QuizEditorPage() {
   if (quizLoading || questionsLoading) return <LoadingSpinner />
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-wow-bg">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
           <button
             onClick={() => navigate(`/quizzes/${quizId}`)}
-            className="text-gray-500 hover:text-gray-800 dark:text-gray-400"
+            className="text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>
             {editingMeta ? 'Edit Quiz Info' : displayName}
           </h1>
           {!editingMeta && (
@@ -163,16 +163,16 @@ export function QuizEditorPage() {
               <button
                 type="button"
                 onClick={() => { setSelectMode((s) => !s); setSelectedIds(new Set()) }}
-                className="text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline underline-offset-2"
+                className="text-sm font-medium text-[#9d8a5e] hover:text-[#c8a84b] underline underline-offset-2 transition-colors"
               >
                 {selectMode ? 'Cancel' : 'Bulk delete'}
               </button>
               {selectMode && (
                 <>
-                  <label className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-sm text-[#9d8a5e] cursor-pointer">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 accent-indigo-600"
+                      className="h-4 w-4 accent-[#c8a84b]"
                       checked={selectedIds.size === questions!.length}
                       onChange={(e) =>
                         setSelectedIds(e.target.checked ? new Set(questions!.map((q) => q.id)) : new Set())
@@ -184,7 +184,7 @@ export function QuizEditorPage() {
                     type="button"
                     disabled={selectedIds.size === 0}
                     onClick={handleBulkDelete}
-                    className="ml-auto rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
+                    className="ml-auto rounded bg-gradient-to-b from-[#c0392b] to-[#7f1d1d] px-3 py-1.5 text-sm font-semibold text-white border border-[#ef4444] hover:from-[#e74c3c] hover:to-[#991b1b] disabled:opacity-40 transition-all"
                   >
                     Delete {selectedIds.size > 0 ? `${selectedIds.size} ` : ''}selected
                   </button>
@@ -200,7 +200,7 @@ export function QuizEditorPage() {
                   type="checkbox"
                   checked={selectedIds.has(q.id)}
                   onChange={() => toggleSelect(q.id)}
-                  className="mt-4 h-4 w-4 shrink-0 accent-indigo-600"
+                  className="mt-4 h-4 w-4 shrink-0 accent-[#c8a84b]"
                 />
               )}
               <div className="flex-1 min-w-0">
@@ -222,7 +222,7 @@ export function QuizEditorPage() {
         <BulkAddPanel quizId={quizId!} nextPosition={(questions?.length ?? 0) + 1} />
 
         <Card>
-          <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p className="mb-3 text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">
             Add a single question
           </p>
           <div className="flex flex-wrap gap-2">

@@ -28,23 +28,28 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-wow-bg">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Kvizo</h1>
+          <h1
+            className="text-xl font-black tracking-[0.15em] text-[#f0c040]"
+            style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 12px rgba(200,168,75,0.4)' }}
+          >
+            ⚔ KVIZO
+          </h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</span>
+            <span className="text-sm text-[#6b5e42]">{user?.email}</span>
             {isAdmin && (
               <Link
                 to="/admin/users"
-                className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                className="text-sm text-[#c8a84b] hover:text-[#f0c040] transition-colors"
               >
                 Manage Players
               </Link>
             )}
             <Button variant="ghost" size="sm" onClick={signOut}>
-              Sign out
+              Sign Out
             </Button>
           </div>
         </div>
@@ -52,7 +57,12 @@ export function DashboardPage() {
 
       <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">My Quizzes</h2>
+          <h2
+            className="text-2xl font-bold text-[#c8a84b]"
+            style={{ fontFamily: 'Cinzel, serif' }}
+          >
+            My Quizzes
+          </h2>
           <Button onClick={() => setCreating(true)}>+ New Quiz</Button>
         </div>
 
@@ -79,24 +89,25 @@ export function DashboardPage() {
         {isLoading ? (
           <LoadingSpinner />
         ) : quizzes?.length === 0 ? (
-          <Card className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <Card className="text-center py-12 text-[#9d8a5e]">
             No quizzes yet. Create one to get started!
           </Card>
         ) : (
           <div className="flex flex-col gap-3">
             {quizzes?.map((quiz) => (
-              <Card key={quiz.id} className="flex items-center justify-between">
+              <Card key={quiz.id} className="flex items-center justify-between hover:border-[#f0c040] hover:shadow-[0_0_20px_rgba(200,168,75,0.2)] transition-all duration-200">
                 <div>
                   <Link
                     to={`/quizzes/${quiz.id}`}
-                    className="text-lg font-semibold text-gray-900 hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
+                    className="text-lg font-semibold text-[#e8d5a0] hover:text-[#f0c040] transition-colors"
+                    style={{ fontFamily: 'Cinzel, serif' }}
                   >
                     {quiz.name}
                   </Link>
                   {quiz.description && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{quiz.description}</p>
+                    <p className="text-sm text-[#9d8a5e]">{quiz.description}</p>
                   )}
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                  <p className="text-xs text-[#6b5e42]">
                     {formatDate(quiz.updated_at)}
                   </p>
                 </div>

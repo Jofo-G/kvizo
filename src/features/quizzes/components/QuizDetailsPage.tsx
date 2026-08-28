@@ -27,16 +27,16 @@ export function QuizDetailsPage() {
   if (isLoading) return <LoadingSpinner />
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+    <div className="min-h-screen bg-wow-bg">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+            className="text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{quiz?.name}</h1>
+          <h1 className="text-xl font-bold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>{quiz?.name}</h1>
         </div>
       </header>
 
@@ -50,30 +50,30 @@ export function QuizDetailsPage() {
 
         {quiz?.description && (
           <Card>
-            <p className="text-gray-700 dark:text-gray-300">{quiz.description}</p>
+            <p className="text-[#9d8a5e]">{quiz.description}</p>
           </Card>
         )}
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="mb-3 text-lg font-semibold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>
             Session History
           </h2>
           {sessions?.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">No sessions yet.</p>
+            <p className="text-[#9d8a5e]">No sessions yet.</p>
           ) : (
             <div className="flex flex-col gap-3">
               {sessions?.map((s) => (
                 <Card key={s.id} className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="font-medium text-[#e8d5a0]">
                       {formatDate(s.created_at)}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-[#9d8a5e]">
                       Status:{' '}
                       <span className={
-                        s.status === 'RUNNING' ? 'text-green-600 font-semibold' :
-                        s.status === 'LOBBY' ? 'text-yellow-600 font-semibold' :
-                        'text-gray-500'
+                        s.status === 'RUNNING' ? 'text-green-400 font-semibold' :
+                        s.status === 'LOBBY' ? 'text-[#f0c040] font-semibold' :
+                        'text-[#6b5e42]'
                       }>
                         {s.status}
                       </span>

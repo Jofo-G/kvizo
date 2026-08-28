@@ -126,10 +126,10 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
   if (!session.current_question_id) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <div className="flex min-h-screen items-center justify-center bg-wow-bg p-4">
         <Card className="text-center">
-          <p className="text-gray-500 dark:text-gray-400">Waiting for next question…</p>
-          <p className="text-sm mt-2 text-indigo-500 font-semibold">
+          <p className="text-[#9d8a5e]">Waiting for next question…</p>
+          <p className="text-sm mt-2 text-[#c8a84b] font-semibold">
             Score: {myPlayer.score}
           </p>
         </Card>
@@ -139,18 +139,18 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
   if (!question) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen items-center justify-center bg-wow-bg">
         <LoadingSpinner />
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-wow-bg">
       {/* Score bar */}
-      <div className="bg-indigo-600 px-4 py-2 flex items-center justify-between text-sm font-semibold text-white">
-        <span>{myPlayer.display_name} · {isClosed ? `Score: ${myPlayer.score}` : '🔒'}</span>
-        <span className="text-indigo-200">
+      <div className="border-b border-[#7a5c1c] bg-[#0c0f18] px-4 py-2 flex items-center justify-between text-sm font-semibold">
+        <span className="text-[#c8a84b]">{myPlayer.display_name} · {isClosed ? `Score: ${myPlayer.score}` : '🔒'}</span>
+        <span className="text-[#9d8a5e]">
           Q{question?.position ?? questionNumber}{totalQuestions > 0 ? `/${totalQuestions}` : ''}
         </span>
       </div>
@@ -160,21 +160,21 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           {/* Question label */}
           {question.text && (
             <Card>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">{question.text}</p>
+              <p className="text-lg font-semibold text-[#e8d5a0]">{question.text}</p>
             </Card>
           )}
 
-          {/* Follow-up question — no answering, host scores directly */}
+          {/* Follow-up question */}
           {question.type === 'FOLLOW_UP' && (
-            <Card className="text-center border-amber-400 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700">
-              <p className="text-base font-bold text-amber-700 dark:text-amber-400 mb-1">
-                ↪ Bonus follow-up
+            <Card className="text-center border-[#c8a84b]/60 bg-[#1a1200]">
+              <p className="text-base font-bold text-[#f0c040] mb-1" style={{ fontFamily: 'Cinzel, serif' }}>
+                ↪ Bonus Follow-up
               </p>
-              <p className="text-sm text-amber-600 dark:text-amber-500">
+              <p className="text-sm text-[#9d8a5e]">
                 No answer needed — the host will score you directly.
               </p>
               {myPlayer.score !== undefined && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                <p className="text-xs text-[#6b5e42] mt-3">
                   Current score: {myPlayer.score}
                 </p>
               )}
@@ -183,41 +183,41 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
           {/* Progressive hint */}
           {question.type === 'PROGRESSIVE_HINTS' && (
-            <Card className="border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 dark:border-indigo-700">
+            <Card className="border-[#9f69e0]/50 bg-[#0d0a18]">
               {currentHint ? (
                 <>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#9f69e0] mb-1">
                     Hint {session.current_hint_index} · {currentHint.points} pts if correct now
                   </p>
-                  <p className="text-gray-800 dark:text-gray-200">{currentHint.text}</p>
+                  <p className="text-[#e8d5a0]">{currentHint.text}</p>
                 </>
               ) : (
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#9f69e0]">
                   No hint yet — answer now for maximum points
                 </p>
               )}
             </Card>
           )}
 
-          {/* Closed notice — green immediately if correct, waiting otherwise until host acts */}
+          {/* Closed notice */}
           {isClosed && question.type !== 'FOLLOW_UP' && (
-            <Card className={`text-center ${
+            <Card className={`text-center border ${
               reviewResult?.is_correct === true
-                ? 'bg-green-50 border-green-400 dark:bg-green-950/40 dark:border-green-600'
-                : 'bg-amber-50 border-amber-400 dark:bg-amber-950/40 dark:border-amber-700'
+                ? 'bg-green-950/40 border-green-700/60'
+                : 'bg-[#1a0e00] border-[#c8a84b]/40'
             }`}>
               {reviewResult?.is_correct === true ? (
                 <>
-                  <p className="text-xl font-bold text-green-700 dark:text-green-400">
-                    ✓ Correct! +{reviewResult.points_awarded} points
+                  <p className="text-xl font-bold text-green-400" style={{ fontFamily: 'Cinzel, serif' }}>
+                    ✔ Correct! +{reviewResult.points_awarded} points
                   </p>
-                  <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                  <p className="text-sm text-green-600 mt-1">
                     Total: {myPlayer.score}
                   </p>
                 </>
               ) : (
-                <p className="text-amber-700 dark:text-amber-400 font-semibold">
-                  {hasEverSubmitted ? '✓ Answer submitted — waiting for host review…' : 'Answers closed — no answer submitted'}
+                <p className="text-[#c8a84b] font-semibold">
+                  {hasEverSubmitted ? '✔ Answer submitted — waiting for host review…' : 'Answers closed — no answer submitted'}
                 </p>
               )}
             </Card>
@@ -225,11 +225,11 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
           {/* Submitted confirmation while still open */}
           {submitted && !isClosed && question.type !== 'FOLLOW_UP' && (
-            <Card className="text-center bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
-              <p className="text-gray-700 dark:text-gray-200 font-semibold">
-                ✓ Answer submitted
+            <Card className="text-center bg-[#0c0f18] border-[#7a5c1c]">
+              <p className="text-[#c8a84b] font-semibold">
+                ✔ Answer submitted
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-[#6b5e42] mt-1">
                 {question?.type === 'PROGRESSIVE_HINTS'
                   ? 'You can update your answer when the next hint is revealed'
                   : 'You can update your answer until the host closes the question'}
@@ -247,10 +247,10 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
                       key={opt.id}
                       type="button"
                       onClick={() => setSelectedOptionId(opt.id)}
-                      className={`rounded-2xl border-2 px-5 py-4 text-left text-lg font-semibold transition-all ${
+                      className={`rounded border-2 px-5 py-4 text-left text-lg font-semibold transition-all ${
                         selectedOptionId === opt.id
-                          ? 'border-indigo-500 bg-indigo-600 text-white'
-                          : 'border-gray-200 bg-white text-gray-900 hover:border-indigo-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white'
+                          ? 'border-[#f0c040] bg-[#1a1200] text-[#f0c040] shadow-[0_0_15px_rgba(200,168,75,0.3)]'
+                          : 'border-[#7a5c1c] bg-[#10131e] text-[#e8d5a0] hover:border-[#c8a84b] hover:bg-[#161a28]'
                       }`}
                     >
                       {String.fromCharCode(65 + i)}. {opt.text}
@@ -267,7 +267,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
               {(question.type === 'OPEN' || question.type === 'PROGRESSIVE_HINTS') && (
                 <div className="flex flex-col gap-3">
                   <input
-                    className="w-full rounded-2xl border-2 border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 outline-none focus:border-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded border-2 border-[#7a5c1c] bg-[#080a10] px-5 py-4 text-lg text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] focus:shadow-[0_0_10px_rgba(200,168,75,0.25)] transition-all"
                     placeholder="Your answer…"
                     value={openText}
                     onChange={(e) => setOpenText(e.target.value)}
@@ -282,7 +282,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
               )}
 
               {submitError && (
-                <p className="text-sm text-red-600 text-center">{submitError}</p>
+                <p className="text-sm text-red-400 text-center">{submitError}</p>
               )}
             </form>
           )}
@@ -290,7 +290,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           {/* Already submitted - show waiting state */}
           {submitted && !isClosed && (
             <Card className="text-center">
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className="text-[#9d8a5e] text-sm">
                 Answer submitted. Waiting for host…
               </p>
             </Card>

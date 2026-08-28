@@ -50,14 +50,19 @@ export function LoginPage() {
 
   if (registered) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <div className="flex min-h-screen items-center justify-center bg-wow-bg p-4">
         <Card className="w-full max-w-sm text-center flex flex-col gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Account created!</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1
+            className="text-2xl font-black text-[#f0c040]"
+            style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 15px rgba(200,168,75,0.5)' }}
+          >
+            Account Created!
+          </h1>
+          <p className="text-[#9d8a5e]">
             Check your email to confirm your account, then sign in.
           </p>
           <Button onClick={() => { setRegistered(false); switchMode('signin') }}>
-            Go to sign in
+            Go to Sign In
           </Button>
         </Card>
       </div>
@@ -65,24 +70,37 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
-      <Card className="w-full max-w-sm">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Kvizo</h1>
+    <div
+      className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4"
+      style={{ background: 'radial-gradient(ellipse at center top, rgba(100,60,180,0.07) 0%, #080a10 65%)' }}
+    >
+      {/* WoW-style logo */}
+      <div className="mb-8 text-center">
+        <h1
+          className="text-5xl font-black tracking-[0.2em] text-[#f0c040]"
+          style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 25px rgba(200,168,75,0.6), 0 2px 4px rgba(0,0,0,0.8)' }}
+        >
+          ⚔ KVIZO ⚔
+        </h1>
+        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Enter the Realm</p>
+      </div>
 
+      <Card className="w-full max-w-sm">
         {/* Mode tabs */}
-        <div className="mb-6 flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="mb-6 flex overflow-hidden rounded border border-[#7a5c1c]">
           {(['signin', 'register'] as Mode[]).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => switchMode(m)}
-              className={`flex-1 py-2 text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2.5 text-sm font-semibold tracking-wide transition-all ${
                 mode === m
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700'
+                  ? 'bg-gradient-to-b from-[#d4a843] to-[#7a5c1c] text-[#1a0e00]'
+                  : 'bg-transparent text-[#9d8a5e] hover:text-[#c8a84b] hover:bg-[#c8a84b]/5'
               }`}
+              style={{ fontFamily: 'Cinzel, serif' }}
             >
-              {m === 'signin' ? 'Sign in' : 'Register'}
+              {m === 'signin' ? 'Sign In' : 'Register'}
             </button>
           ))}
         </div>
@@ -92,7 +110,7 @@ export function LoginPage() {
             id="email"
             type="email"
             label="Email"
-            placeholder="you@example.com"
+            placeholder="hero@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -107,21 +125,21 @@ export function LoginPage() {
             required
             minLength={6}
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full">
             {loading
               ? mode === 'register' ? 'Creating account…' : 'Signing in…'
-              : mode === 'register' ? 'Create account' : 'Sign in'}
+              : mode === 'register' ? 'Create Account' : 'Sign In'}
           </Button>
         </form>
 
         {mode === 'signin' && (
-          <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+          <div className="mt-4 border-t border-[#7a5c1c] pt-4">
             <button
               type="button"
               onClick={() => signInWithGoogle()}
               disabled={loading}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              className="flex w-full items-center justify-center gap-3 rounded border border-[#7a5c1c] bg-[#080a10] px-4 py-2.5 text-sm font-semibold text-[#9d8a5e] transition-all hover:border-[#c8a84b] hover:text-[#c8a84b] disabled:opacity-40"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

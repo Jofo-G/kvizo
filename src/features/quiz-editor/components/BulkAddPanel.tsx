@@ -69,7 +69,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between text-sm font-semibold text-gray-700 dark:text-gray-200"
+        className="flex w-full items-center justify-between text-sm font-semibold text-[#c8a84b] hover:text-[#f0c040] transition-colors"
       >
         <span>⚡ Bulk add questions</span>
         {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -79,7 +79,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
         <div className="mt-4 flex flex-col gap-4">
           {/* Type */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="text-sm font-medium text-[#9d8a5e] uppercase tracking-wider">
               Question type
             </label>
             <div className="flex gap-2 flex-wrap">
@@ -88,10 +88,10 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                   key={t.value}
                   type="button"
                   onClick={() => setType(t.value)}
-                  className={`rounded-xl px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  className={`rounded px-3 py-1.5 text-sm font-semibold transition-all border ${
                     type === t.value
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
+                      ? 'bg-gradient-to-b from-[#d4a843] to-[#7a5c1c] text-[#1a0e00] border-[#f0c040]'
+                      : 'bg-[#10131e] text-[#9d8a5e] border-[#7a5c1c] hover:border-[#c8a84b] hover:text-[#c8a84b]'
                   }`}
                 >
                   {t.label}
@@ -102,7 +102,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
 
           {/* Count */}
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
+            <label className="text-sm font-medium text-[#9d8a5e] w-36">
               Number of questions
             </label>
             <input
@@ -111,21 +111,21 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
               max={100}
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
-              className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+              className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
             />
           </div>
 
           {/* Name prefix — applied to all created questions */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Question name / label <span className="text-gray-400 font-normal">(optional, same for all)</span>
+            <label className="text-sm font-medium text-[#9d8a5e]">
+              Question name / label <span className="text-[#6b5e42] font-normal">(optional, same for all)</span>
             </label>
             <input
               type="text"
               value={namePrefix}
               onChange={(e) => setNamePrefix(e.target.value)}
               placeholder="e.g. Which zone is this mob from"
-              className="rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+              className="rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
             />
           </div>
 
@@ -137,25 +137,25 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                   type="checkbox"
                   checked={withFollowUp}
                   onChange={(e) => setWithFollowUp(e.target.checked)}
-                  className="h-4 w-4 accent-amber-500"
+                  className="h-4 w-4 accent-[#c8a84b]"
                 />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-[#9d8a5e]">
                   Add a follow-up after each question
                 </span>
               </label>
               {withFollowUp && (
                 <div className="ml-6 flex flex-col gap-1">
-                  <label className="text-sm text-gray-500 dark:text-gray-400">
-                    Follow-up label <span className="font-normal">(optional)</span>
+                  <label className="text-sm text-[#9d8a5e]">
+                    Follow-up label <span className="font-normal text-[#6b5e42]">(optional)</span>
                   </label>
                   <input
                     type="text"
                     value={followUpNamePrefix}
                     onChange={(e) => setFollowUpNamePrefix(e.target.value)}
                     placeholder="e.g. Show where in the zone the mob is"
-                    className="rounded-xl border border-amber-300 px-3 py-1.5 text-sm dark:border-amber-700 dark:bg-gray-800 dark:text-gray-100"
+                    className="rounded border border-[#c8a84b]/40 bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] placeholder-[#6b5e42] outline-none focus:border-[#c8a84b] transition-colors"
                   />
-                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                  <p className="text-xs text-[#f0c040]/70">
                     Creates {count * 2} questions total — one follow-up after each main question.
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           {type === 'PROGRESSIVE_HINTS' && (
             <>
               <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
+                <label className="text-sm font-medium text-[#9d8a5e] w-36">
                   Points — no hint
                 </label>
                 <input
@@ -175,18 +175,18 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                   min={1}
                   value={defaultPoints}
                   onChange={(e) => setDefaultPoints(Number(e.target.value))}
-                  className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
                 />
-                <span className="text-xs text-gray-400">awarded if answered before any hint</span>
+                <span className="text-xs text-[#6b5e42]">awarded if answered before any hint</span>
               </div>
               <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-[#9d8a5e]">
                 Hints (points per hint)
               </label>
               <div className="flex flex-wrap gap-2 items-center">
                 {hintPoints.map((pts, i) => (
                   <div key={i} className="flex items-center gap-1">
-                    <span className="text-xs text-gray-400">#{i + 1}</span>
+                    <span className="text-xs text-[#6b5e42]">#{i + 1}</span>
                     <input
                       type="number"
                       min={0}
@@ -196,12 +196,12 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                         next[i] = Number(e.target.value)
                         setHintPoints(next)
                       }}
-                      className="w-16 rounded-lg border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                      className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => removeHintSlot(i)}
-                      className="text-red-400 hover:text-red-600"
+                      className="text-red-600 hover:text-red-400 transition-colors"
                       disabled={hintPoints.length <= 1}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -212,7 +212,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                   + Hint
                 </Button>
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[#6b5e42]">
                 Each question gets {hintPoints.length} hint(s). Answers left blank — fill them in after.
               </p>
               </div>
@@ -222,7 +222,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           {/* Multiple choice option count */}
           {type === 'MULTIPLE_CHOICE' && (
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
+              <label className="text-sm font-medium text-[#9d8a5e] w-36">
                 Options per question
               </label>
               <input
@@ -231,16 +231,16 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                 max={8}
                 value={optionCount}
                 onChange={(e) => setOptionCount(Number(e.target.value))}
-                className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
               />
-              <span className="text-xs text-gray-400">blank options, fill text after</span>
+              <span className="text-xs text-[#6b5e42]">blank options, fill text after</span>
             </div>
           )}
 
           {/* Default points for non-progressive, non-followup */}
           {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && (
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-36">
+              <label className="text-sm font-medium text-[#9d8a5e] w-36">
                 Points per correct answer
               </label>
               <input
@@ -248,13 +248,13 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                 min={1}
                 value={defaultPoints}
                 onChange={(e) => setDefaultPoints(Number(e.target.value))}
-                className="w-20 rounded-xl border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
               />
             </div>
           )}
 
           {type === 'FOLLOW_UP' && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
+            <p className="text-xs text-[#f0c040]/80 rounded border border-[#c8a84b]/30 bg-[#1a1200] px-3 py-2">
               ↪ Follow-up questions have no answer — host scores each player +1 / 0 / −1 during the session.
             </p>
           )}
@@ -266,7 +266,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           </Button>
 
           {done && (
-            <p className="text-sm text-green-600 dark:text-green-400 text-center">
+            <p className="text-sm text-green-400 text-center">
               ✓ {withFollowUp && type !== 'FOLLOW_UP' ? count * 2 : count} questions added
             </p>
           )}

@@ -98,7 +98,7 @@ export function HostSessionPage() {
   }
 
   if (loading) return <LoadingSpinner />
-  if (!session) return <p className="p-8 text-center">Session not found.</p>
+  if (!session) return <p className="p-8 text-center text-[#9d8a5e]">Session not found.</p>
 
   const isLobby = session.status === 'LOBBY'
   const isRunning = session.status === 'RUNNING'
@@ -109,26 +109,26 @@ export function HostSessionPage() {
   const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-wow-bg text-[#e8d5a0]">
       {/* Header */}
-      <header className="border-b border-gray-700 bg-gray-800 px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div>
-          <p className="text-xs uppercase tracking-widest text-gray-400">Host Control</p>
-          <p className="text-2xl font-bold">
-            ROOM CODE:{' '}
-            <span className="font-mono text-indigo-400">{session.join_code}</span>
+          <p className="text-xs uppercase tracking-[0.25em] text-[#9d8a5e]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
+          <p className="text-2xl font-bold" style={{ fontFamily: 'Cinzel, serif' }}>
+            ROOM:{' '}
+            <span className="font-mono text-[#f0c040]" style={{ textShadow: '0 0 10px rgba(200,168,75,0.5)' }}>{session.join_code}</span>
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-gray-300">
+          <div className="flex items-center gap-2 text-[#9d8a5e]">
             <Users className="h-5 w-5" />
-            <span className="text-lg font-semibold">{players.length}</span>
+            <span className="text-lg font-semibold text-[#c8a84b]">{players.length}</span>
           </div>
           <a
             href={`/sessions/${sessionId}/leaderboard`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors"
+            className="rounded border border-[#c8a84b] bg-[#10131e] px-3 py-1.5 text-sm font-semibold text-[#c8a84b] transition-all hover:border-[#f0c040] hover:text-[#f0c040] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]"
           >
             Open Leaderboard ↗
           </a>
@@ -139,24 +139,24 @@ export function HostSessionPage() {
       <main className="flex flex-col gap-6">
         {/* LOBBY */}
         {isLobby && (
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">Waiting for players…</h2>
+          <Card>
+            <h2 className="text-xl font-bold text-[#c8a84b] mb-4" style={{ fontFamily: 'Cinzel, serif' }}>Waiting for players…</h2>
 
             {/* QR code + join URL */}
-            <div className="flex flex-col items-center gap-3 mb-6 p-4 rounded-xl bg-white">
+            <div className="flex flex-col items-center gap-3 mb-6 p-4 rounded border border-[#7a5c1c] bg-white">
               <QRCodeSVG
                 value={`${window.location.origin}/join?code=${session.join_code}`}
                 size={180}
                 includeMargin
               />
-              <p className="text-sm text-gray-500 font-mono">{window.location.origin}/join</p>
+              <p className="text-sm text-[#9d8a5e] font-mono">{window.location.origin}/join</p>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {players.map((p) => (
                 <span
                   key={p.id}
-                  className="rounded-full bg-indigo-900/50 px-3 py-1 text-sm text-indigo-300"
+                  className="rounded-full border border-[#7a5c1c] bg-[#10131e] px-3 py-1 text-sm text-[#c8a84b]"
                 >
                   {p.display_name}
                 </span>
@@ -179,25 +179,25 @@ export function HostSessionPage() {
 
             {/* Active question controls */}
             {session.current_question_id && (
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <Card>
                 <div className="mb-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-400">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#9d8a5e]" style={{ fontFamily: 'Cinzel, serif' }}>
                     Question {currentIdx + 1} / {questions?.length}
                   </p>
-                  <p className="text-xl font-bold text-white">
+                  <p className="text-xl font-bold text-[#e8d5a0]">
                     {currentQuestion?.text || `Question ${currentIdx + 1}`}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-[#9d8a5e] mt-1">
                     Type: {currentQuestion?.type.replace('_', ' ')}
                   </p>
                   {isProgressiveHints && (
-                    <p className="text-sm text-indigo-400 mt-1">
+                    <p className="text-sm text-[#c8a84b] mt-1">
                       {session.current_hint_index === 0
                         ? 'No hint shown yet (max points)'
                         : `Hint ${session.current_hint_index} shown`}
                     </p>
                   )}
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-[#9d8a5e] mt-1">
                     Answers received: {currentAnswers?.length ?? 0} / {players.length}
                   </p>
                 </div>
@@ -209,7 +209,7 @@ export function HostSessionPage() {
                     </Button>
                   )}
                   {isProgressiveHints && allHintsRevealed && session.accepting_answers && (
-                    <p className="text-center text-sm text-gray-400">All hints revealed</p>
+                    <p className="text-center text-sm text-[#9d8a5e]">All hints revealed</p>
                   )}
                   {session.accepting_answers && !isFollowUp && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
@@ -249,8 +249,8 @@ export function HostSessionPage() {
 
             {/* Answer review — shown for non-follow-up types after answers close */}
             {!session.accepting_answers && currentQuestion && !isFollowUp && (currentAnswers?.length ?? 0) > 0 && (
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-3">
+              <Card>
+                <h3 className="text-lg font-semibold text-[#c8a84b] mb-3" style={{ fontFamily: 'Cinzel, serif' }}>
                   Answer Review — approve or reject each answer
                 </h3>
                 <div className="flex flex-col gap-2">
@@ -260,19 +260,19 @@ export function HostSessionPage() {
                     return (
                       <div
                         key={a.id}
-                        className={`flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${
-                          effective === true ? 'bg-green-900/40' :
-                          effective === false ? 'bg-red-900/30' :
-                          'bg-gray-700'
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 transition-colors border ${
+                          effective === true ? 'bg-green-950/40 border-green-700/50' :
+                          effective === false ? 'bg-red-950/30 border-red-900/50' :
+                          'bg-[#0c0f18] border-[#7a5c1c]'
                         }`}
                       >
                         <div>
-                          <span className="font-semibold text-white">{player?.display_name}</span>
-                          <p className="text-sm text-gray-300 mt-0.5">
+                          <span className="font-semibold text-[#e8d5a0]">{player?.display_name}</span>
+                          <p className="text-sm text-[#9d8a5e] mt-0.5">
                             {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
                           </p>
                           {a.hint_index_at_submission != null && (
-                            <p className="text-xs text-gray-500 mt-0.5">
+                            <p className="text-xs text-[#6b5e42] mt-0.5">
                               Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
                             </p>
                           )}
@@ -281,10 +281,10 @@ export function HostSessionPage() {
                           <button
                             onClick={() => handleOverride(a, true)}
                             disabled={!!overrideLoading[a.id]}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
+                            className={`rounded px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
                               effective === true
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-600 text-gray-300 hover:bg-green-700 hover:text-white'
+                                ? 'bg-green-600 text-white border border-green-500'
+                                : 'bg-[#10131e] text-[#9d8a5e] border border-[#7a5c1c] hover:bg-green-800 hover:text-green-300 hover:border-green-700'
                             }`}
                           >
                             {overrideLoading[a.id] === 'approve' ? '…' : `✓ ${effective === true ? `${a.points_awarded}pts` : 'Approve'}`}
@@ -292,10 +292,10 @@ export function HostSessionPage() {
                           <button
                             onClick={() => handleOverride(a, false)}
                             disabled={!!overrideLoading[a.id]}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
+                            className={`rounded px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-60 ${
                               effective === false
-                                ? 'bg-red-500 text-white'
-                                : 'bg-gray-600 text-gray-300 hover:bg-red-700 hover:text-white'
+                                ? 'bg-red-600 text-white border border-red-500'
+                                : 'bg-[#10131e] text-[#9d8a5e] border border-[#7a5c1c] hover:bg-red-900 hover:text-red-300 hover:border-red-800'
                             }`}
                           >
                             {overrideLoading[a.id] === 'reject' ? '…' : '✕ Reject'}
@@ -310,11 +310,11 @@ export function HostSessionPage() {
 
             {/* Follow-up scoring panel */}
             {isFollowUp && currentQuestion && (
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-1">
+              <Card>
+                <h3 className="text-lg font-semibold text-[#c8a84b] mb-1" style={{ fontFamily: 'Cinzel, serif' }}>
                   ↪ Follow-up — score each player
                 </h3>
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-[#9d8a5e] mb-4">
                   Default is 0. Give +1 if they got it right, −1 if wrong.
                 </p>
                 <div className="flex flex-col gap-2">
@@ -322,20 +322,20 @@ export function HostSessionPage() {
                     const assigned = followUpScores[p.id] ?? 0
                     const busy = !!followUpLoading[p.id]
                     return (
-                      <div key={p.id} className="flex items-center justify-between rounded-lg bg-gray-700 px-4 py-3">
-                        <span className="font-semibold text-white">{p.display_name}</span>
+                      <div key={p.id} className="flex items-center justify-between rounded border border-[#7a5c1c] bg-[#0c0f18] px-4 py-3">
+                        <span className="font-semibold text-[#e8d5a0]">{p.display_name}</span>
                         <div className="flex gap-1 shrink-0">
                           {([-1, 0, 1] as const).map((val) => (
                             <button
                               key={val}
                               disabled={busy}
                               onClick={() => handleFollowUpScore(p.id, val)}
-                              className={`rounded-lg px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-50 ${
+                              className={`rounded px-3 py-1.5 text-sm font-bold transition-colors disabled:opacity-50 ${
                                 assigned === val
-                                  ? val === 1  ? 'bg-green-500 text-white'
-                                  : val === -1 ? 'bg-red-500 text-white'
-                                  :              'bg-gray-500 text-white'
-                                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                                  ? val === 1  ? 'bg-green-600 text-white border border-green-500'
+                                  : val === -1 ? 'bg-red-600 text-white border border-red-500'
+                                  :              'bg-[#7a5c1c] text-[#e8d5a0] border border-[#c8a84b]'
+                                  : 'bg-[#10131e] text-[#9d8a5e] border border-[#7a5c1c] hover:border-[#c8a84b] hover:text-[#c8a84b]'
                               }`}
                             >
                               {val === 1 ? '+1' : val === -1 ? '−1' : '0'}
@@ -353,17 +353,17 @@ export function HostSessionPage() {
 
         {/* FINISHED */}
         {isFinished && (
-          <Card className="dark:bg-gray-800 dark:border-gray-700 text-center">
-            <h2 className="text-2xl font-bold text-white mb-6">Final Results</h2>
+          <Card className="text-center">
+            <h2 className="text-2xl font-bold text-[#f0c040] mb-6" style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 15px rgba(200,168,75,0.4)' }}>Final Results</h2>
             <ol className="flex flex-col gap-3 mb-6">
               {[...players]
                 .sort((a, b) => b.score - a.score)
                 .map((p, i) => (
                   <li key={p.id} className="flex items-center justify-between text-xl">
-                    <span className="text-gray-300">
+                    <span className="text-[#9d8a5e]">
                       {i + 1}. {p.display_name}
                     </span>
-                    <span className="font-bold text-white">{p.score}</span>
+                    <span className="font-bold text-[#c8a84b]">{p.score}</span>
                   </li>
                 ))}
             </ol>

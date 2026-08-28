@@ -8,7 +8,7 @@ interface Props {
 export function LoadingSpinner({ className }: Props) {
   return (
     <div className={cn('flex items-center justify-center p-8', className)}>
-      <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-[#c8a84b]" />
     </div>
   )
 }
