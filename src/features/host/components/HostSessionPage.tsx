@@ -277,7 +277,9 @@ export function HostSessionPage() {
                   Answer Review — approve or reject each answer
                 </h3>
                 <div className="flex flex-col gap-2">
-                  {currentAnswers?.map((a) => {
+                  {[...(currentAnswers ?? [])]
+                    .sort((a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime())
+                    .map((a, rank) => {
                     const player = players.find((p) => p.id === a.session_player_id)
                     const effective = a.id in optimisticOverrides ? optimisticOverrides[a.id] : a.is_correct
                     return (
@@ -289,16 +291,21 @@ export function HostSessionPage() {
                           'bg-[#0c0f18] border-[#7a5c1c]'
                         }`}
                       >
-                        <div>
-                          <span className="font-semibold text-[#e8d5a0]">{player?.display_name}</span>
-                          <p className="text-sm text-[#9d8a5e] mt-0.5">
-                            {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
-                          </p>
-                          {a.hint_index_at_submission != null && (
-                            <p className="text-xs text-[#6b5e42] mt-0.5">
-                              Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
+                        <div className="flex items-center gap-3">
+                          <span className={`text-lg font-black tabular-nums w-7 shrink-0 ${
+                            rank === 0 ? 'text-[#f0c040]' : rank === 1 ? 'text-[#9d9d9d]' : rank === 2 ? 'text-[#cd7f32]' : 'text-[#6b5e42]'
+                          }`}>#{rank + 1}</span>
+                          <div>
+                            <span className="font-semibold text-[#e8d5a0]">{player?.display_name}</span>
+                            <p className="text-sm text-[#9d8a5e] mt-0.5">
+                              {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
                             </p>
-                          )}
+                            {a.hint_index_at_submission != null && (
+                              <p className="text-xs text-[#6b5e42] mt-0.5">
+                                Answered {a.hint_index_at_submission === 0 ? 'before hints' : `after hint ${a.hint_index_at_submission}`}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div className="flex gap-2 items-center shrink-0 ml-4">
                           <button
