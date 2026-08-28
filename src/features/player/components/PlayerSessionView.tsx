@@ -175,7 +175,7 @@ export function PlayerSessionView({ sessionId }: Props) {
           </div>
           <p className="text-[#9d8a5e] mb-6">Waiting for host to start…</p>
           <p className="text-sm text-[#6b5e42] mb-4">
-            {activePlayers.length} player{activePlayers.length !== 1 ? 's' : ''} in the arena
+            {activePlayers.length} player{activePlayers.length !== 1 ? 's' : ''} in the Tavern
           </p>
           <button
             onClick={leaveSession}

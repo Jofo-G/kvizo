@@ -56,7 +56,7 @@ export function JoinPage() {
         >
           ⚔ KVIZO ⚔
         </h1>
-        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Enter the Arena</p>
+        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-[#9d8a5e]">Enter the Tavern</p>
       </div>
 
       <Card className="w-full max-w-sm">
