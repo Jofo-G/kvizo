@@ -16,6 +16,7 @@ const TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
   { value: 'OPEN', label: 'Open Answer' },
   { value: 'FOLLOW_UP', label: 'Follow-up' },
+  { value: 'PAUSE', label: '⏸ Pause' },
 ]
 
 export function BulkAddPanel({ quizId, nextPosition }: Props) {
@@ -238,7 +239,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           )}
 
           {/* Default points for non-progressive, non-followup */}
-          {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && (
+          {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && type !== 'PAUSE' && (
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-[#9d8a5e] w-36">
                 Points per correct answer

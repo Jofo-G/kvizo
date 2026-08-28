@@ -126,8 +126,9 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
   if (!session.current_question_id) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-wow-bg p-4">
-        <Card className="text-center">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+        <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+        <Card className="relative z-10 text-center">
           <p className="text-[#9d8a5e]">Waiting for next question…</p>
           <p className="text-sm mt-2 text-[#c8a84b] font-semibold">
             Score: {myPlayer.score}
@@ -139,16 +140,19 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
   if (!question) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-wow-bg">
-        <LoadingSpinner />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+        <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+        <div className="relative z-10"><LoadingSpinner /></div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-wow-bg">
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+      <div className="relative z-10 flex flex-col min-h-screen">
       {/* Score bar */}
-      <div className="border-b border-[#7a5c1c] bg-[#0c0f18] px-4 py-2 flex items-center justify-between text-sm font-semibold">
+      <div className="border-b border-[#7a5c1c] bg-[#0c0f18]/90 backdrop-blur-sm px-4 py-2 flex items-center justify-between text-sm font-semibold">
         <span className="text-[#c8a84b]">{myPlayer.display_name} · {isClosed ? `Score: ${myPlayer.score}` : '🔒'}</span>
         <span className="text-[#9d8a5e]">
           Q{question?.position ?? questionNumber}{totalQuestions > 0 ? `/${totalQuestions}` : ''}
@@ -159,7 +163,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
         <div className="w-full max-w-md flex flex-col gap-4">
 
           {/* Question text — prominent heading, no card box */}
-          {question.text && (
+          {question.text && question.type !== 'PAUSE' && (
             <div className="text-center px-2">
               <p
                 className="text-2xl font-bold text-[#e8d5a0] leading-snug"
@@ -169,6 +173,18 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
               </p>
               <div className="mt-3 h-px bg-gradient-to-r from-transparent via-[#7a5c1c] to-transparent" />
             </div>
+          )}
+
+          {/* Pause screen */}
+          {question.type === 'PAUSE' && (
+            <Card className="text-center border-[#7a5c1c] bg-[#0c0f18]/80">
+              <p className="text-4xl mb-3">⏸</p>
+              <p className="text-xl font-bold text-[#c8a84b] mb-2" style={{ fontFamily: 'Cinzel, serif' }}>
+                {question.text || 'Break Time'}
+              </p>
+              <p className="text-sm text-[#9d8a5e]">Waiting for host to continue…</p>
+              <p className="text-xs text-[#6b5e42] mt-3">Score: {myPlayer.score}</p>
+            </Card>
           )}
 
           {/* Follow-up question */}
@@ -210,7 +226,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Closed notice */}
-          {isClosed && question.type !== 'FOLLOW_UP' && (
+          {isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
             <Card className={`text-center border ${
               reviewResult?.is_correct === true
                 ? 'bg-green-950/40 border-green-700/60'
@@ -234,7 +250,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Submitted confirmation while still open */}
-          {submitted && !isClosed && question.type !== 'FOLLOW_UP' && (
+          {submitted && !isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
             <Card className="text-center bg-[#0c0f18] border-[#7a5c1c]">
               <p className="text-[#c8a84b] font-semibold">
                 ✔ Answer submitted
@@ -248,7 +264,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Answer controls */}
-          {!isClosed && !submitted && question.type !== 'FOLLOW_UP' && (
+          {!isClosed && !submitted && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {question.type === 'MULTIPLE_CHOICE' && (
                 <div className="flex flex-col gap-2">
@@ -308,5 +324,6 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
         </div>
       </div>
     </div>
+  </div>
   )
 }

@@ -107,16 +107,17 @@ export function HostSessionPage() {
   const hasNextQuestion = currentIdx < (questions?.length ?? 0) - 1
   const isProgressiveHints = currentQuestion?.type === 'PROGRESSIVE_HINTS'
   const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
+  const isPause = currentQuestion?.type === 'PAUSE'
 
   return (
     <div
       className="relative min-h-screen text-[#e8d5a0]"
-      style={isLobby ? { backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' } : { background: '#080a10' }}
+      style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
-      {isLobby && <div className="absolute inset-0 bg-[#080a10]/75" />}
+      <div className="absolute inset-0 bg-[#080a10]/78" />
       <div className="relative z-10 flex flex-col min-h-screen">
       {/* Header */}
-      <header className={`border-b border-[#7a5c1c] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)] ${isLobby ? 'bg-[#0c0f18]/90 backdrop-blur-sm' : 'bg-[#0c0f18]'}`}>
+      <header className="border-b border-[#7a5c1c] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)] bg-[#0c0f18]/90 backdrop-blur-sm">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-[#9d8a5e]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
           <p className="text-2xl font-bold" style={{ fontFamily: 'Cinzel, serif' }}>
@@ -171,7 +172,7 @@ export function HostSessionPage() {
               size="lg"
               className="w-full"
               disabled={players.length === 0 || !questions?.length}
-              onClick={() => startQuiz(questions![0].id, questions![0].type !== 'FOLLOW_UP')}
+              onClick={() => startQuiz(questions![0].id, questions![0].type !== 'FOLLOW_UP' && questions![0].type !== 'PAUSE')}
             >
               START QUIZ
             </Button>
@@ -216,22 +217,42 @@ export function HostSessionPage() {
                   {isProgressiveHints && allHintsRevealed && session.accepting_answers && (
                     <p className="text-center text-sm text-[#9d8a5e]">All hints revealed</p>
                   )}
-                  {session.accepting_answers && !isFollowUp && (
+                  {session.accepting_answers && !isFollowUp && !isPause && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
                       CLOSE ANSWERS
                     </Button>
                   )}
-                  {!session.accepting_answers && (
+                  {!session.accepting_answers && !isPause && (
                     <>
                       {hasNextQuestion && (
                         <Button
                           size="lg"
                           onClick={() => {
                             const next = questions![currentIdx + 1]
-                            startQuestion(next.id, next.type !== 'FOLLOW_UP')
+                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE')
                           }}
                         >
                           NEXT QUESTION ({currentIdx + 2}/{questions?.length})
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  {isPause && (
+                    <>
+                      <div className="text-center py-2 mb-3">
+                        <p className="text-3xl mb-1">⏸</p>
+                        <p className="text-base text-[#9d8a5e]">Players are on a break screen.</p>
+                      </div>
+                      {hasNextQuestion && (
+                        <Button
+                          size="lg"
+                          className="w-full"
+                          onClick={() => {
+                            const next = questions![currentIdx + 1]
+                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE')
+                          }}
+                        >
+                          RESUME — NEXT QUESTION ({currentIdx + 2}/{questions?.length})
                         </Button>
                       )}
                     </>
@@ -249,8 +270,8 @@ export function HostSessionPage() {
               </Card>
             )}
 
-            {/* Answer review — shown for non-follow-up types after answers close */}
-            {!session.accepting_answers && currentQuestion && !isFollowUp && (currentAnswers?.length ?? 0) > 0 && (
+            {/* Answer review — shown for non-follow-up, non-pause types after answers close */}
+            {!session.accepting_answers && currentQuestion && !isFollowUp && !isPause && (currentAnswers?.length ?? 0) > 0 && (
               <Card>
                 <h3 className="text-lg font-semibold text-[#c8a84b] mb-3" style={{ fontFamily: 'Cinzel, serif' }}>
                   Answer Review — approve or reject each answer

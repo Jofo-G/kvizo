@@ -90,7 +90,9 @@ export function PlayerSessionView({ sessionId }: Props) {
 
   if (!isJoined) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4">
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+        <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+        <div className="relative z-10 flex w-full flex-col items-center">
         <div className="mb-6 text-center">
           <h1
             className="text-3xl font-black tracking-[0.15em] text-[#f0c040] mb-1"
@@ -147,6 +149,7 @@ export function PlayerSessionView({ sessionId }: Props) {
           )}
           {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
         </Card>
+        </div>
       </div>
     )
   }
@@ -155,8 +158,9 @@ export function PlayerSessionView({ sessionId }: Props) {
   if (session.status === 'LOBBY') {
     const myProfile = profiles?.find((p) => p.id === myPlayer?.player_profile_id)
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4">
-        <Card className="w-full max-w-sm text-center">
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+        <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+        <Card className="relative z-10 w-full max-w-sm text-center">
           <div className="mb-4 flex flex-col items-center gap-3">
             {myProfile?.avatar_url ? (
               <img
@@ -190,8 +194,9 @@ export function PlayerSessionView({ sessionId }: Props) {
 
   if (session.status === 'FINISHED') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-wow-bg p-4">
-        <Card className="w-full max-w-sm text-center">
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
+        <div className="absolute inset-[-5%]" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(6px) brightness(0.2)' }} />
+        <Card className="relative z-10 w-full max-w-sm text-center">
           <h2
             className="text-2xl font-bold text-[#f0c040] mb-4"
             style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 12px rgba(200,168,75,0.4)' }}
@@ -218,8 +223,6 @@ export function PlayerSessionView({ sessionId }: Props) {
       </div>
     )
   }
-
-  // Running
   return (
     <PlayerQuestionView
       session={session}

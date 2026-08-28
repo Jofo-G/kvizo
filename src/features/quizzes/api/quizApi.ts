@@ -117,7 +117,7 @@ export async function bulkCreateQuestions(
         position: startPosition + i * stride,
         type,
         text: namePrefix ?? null,
-        default_points: type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' ? defaultPoints : null,
+        default_points: type !== 'FOLLOW_UP' && type !== 'PAUSE' ? defaultPoints : null,
       })),
     )
     .select()

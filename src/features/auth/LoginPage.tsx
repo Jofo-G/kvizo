@@ -50,8 +50,12 @@ export function LoginPage() {
 
   if (registered) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-wow-bg p-4">
-        <Card className="w-full max-w-sm text-center flex flex-col gap-4">
+      <div
+        className="relative flex min-h-screen items-center justify-center p-4"
+        style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <div className="absolute inset-0 bg-[#080a10]/80" />
+        <Card className="relative z-10 w-full max-w-sm text-center flex flex-col gap-4">
           <h1
             className="text-2xl font-black text-[#f0c040]"
             style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 15px rgba(200,168,75,0.5)' }}

@@ -2,7 +2,7 @@
 // Domain types – mirrors the database schema
 // ============================================================
 
-export type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'PROGRESSIVE_HINTS' | 'FOLLOW_UP'
+export type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'PROGRESSIVE_HINTS' | 'FOLLOW_UP' | 'PAUSE'
 export type SessionStatus = 'LOBBY' | 'RUNNING' | 'FINISHED' | 'CANCELLED'
 export type MemberRole = 'OWNER' | 'EDITOR'
 

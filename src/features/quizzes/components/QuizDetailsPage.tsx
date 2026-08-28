@@ -27,8 +27,10 @@ export function QuizDetailsPage() {
   if (isLoading) return <LoadingSpinner />
 
   return (
-    <div className="min-h-screen bg-wow-bg">
-      <header className="border-b border-[#7a5c1c] bg-[#0c0f18] shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
+    <div className="relative min-h-screen" style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <div className="absolute inset-0 bg-[#080a10]/80" />
+      <div className="relative z-10 min-h-screen">
+      <header className="border-b border-[#7a5c1c] bg-[#0c0f18]/90 backdrop-blur-sm shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
           <button
             onClick={() => navigate('/dashboard')}
@@ -102,6 +104,7 @@ export function QuizDetailsPage() {
           )}
         </section>
       </main>
+      </div>
     </div>
   )
 }
