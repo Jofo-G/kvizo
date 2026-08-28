@@ -157,11 +157,18 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
       <div className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="w-full max-w-md flex flex-col gap-4">
-          {/* Question label */}
+
+          {/* Question text — prominent heading, no card box */}
           {question.text && (
-            <Card>
-              <p className="text-lg font-semibold text-[#e8d5a0]">{question.text}</p>
-            </Card>
+            <div className="text-center px-2">
+              <p
+                className="text-2xl font-bold text-[#e8d5a0] leading-snug"
+                style={{ fontFamily: 'Cinzel, serif' }}
+              >
+                {question.text}
+              </p>
+              <div className="mt-3 h-px bg-gradient-to-r from-transparent via-[#7a5c1c] to-transparent" />
+            </div>
           )}
 
           {/* Follow-up question */}
@@ -181,22 +188,25 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
             </Card>
           )}
 
-          {/* Progressive hint */}
+          {/* Progressive hint — side-accented strip, not a card */}
           {question.type === 'PROGRESSIVE_HINTS' && (
-            <Card className="border-[#9f69e0]/50 bg-[#0d0a18]">
-              {currentHint ? (
-                <>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#9f69e0] mb-1">
-                    Hint {session.current_hint_index} · {currentHint.points} pts if correct now
-                  </p>
-                  <p className="text-[#e8d5a0]">{currentHint.text}</p>
-                </>
-              ) : (
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#9f69e0]">
-                  No hint yet — answer now for maximum points
-                </p>
-              )}
-            </Card>
+            currentHint ? (
+              <div className="rounded-r border-l-4 border-[#9f69e0] bg-[#9f69e0]/10 px-4 py-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#9f69e0]">
+                    ✦ Hint {session.current_hint_index}
+                  </span>
+                  <span className="text-xs font-semibold text-[#9f69e0]/70 tabular-nums">
+                    {currentHint.points} pts if answered now
+                  </span>
+                </div>
+                <p className="text-[#e8d5a0] text-base">{currentHint.text}</p>
+              </div>
+            ) : (
+              <p className="text-center text-xs italic text-[#9d8a5e]">
+                ✦ No hint yet — answer now for maximum points
+              </p>
+            )
           )}
 
           {/* Closed notice */}
