@@ -13,7 +13,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Users } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function HostSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -69,6 +69,12 @@ export function HostSessionPage() {
   // follow-up scoring: tracks committed delta per player (-1 / 0 / +1)
   const [followUpScores, setFollowUpScores] = useState<Record<string, number>>({})
   const [followUpLoading, setFollowUpLoading] = useState<Record<string, boolean>>({})
+
+  // reset per-question follow-up scores when moving to a new question
+  useEffect(() => {
+    setFollowUpScores({})
+    setFollowUpLoading({})
+  }, [session?.current_question_id])
 
   async function handleFollowUpScore(sessionPlayerId: string, newValue: number) {
     const current = followUpScores[sessionPlayerId] ?? 0
