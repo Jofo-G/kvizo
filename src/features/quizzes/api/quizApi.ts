@@ -304,34 +304,17 @@ export async function setSessionFeatured(sessionId: string, featured: boolean): 
 }
 
 export async function fetchFeaturedSessions(): Promise<FeaturedSession[]> {
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .select(`
-      id, quiz_id, created_at,
-      quizzes ( name ),
-      session_players ( display_name, score, player_profiles ( avatar_url ) )
-    `)
-    .eq('is_featured', true)
-    .order('created_at', { ascending: false })
+  const { data, error } = await supabase.rpc('get_featured_sessions')
   if (error) throw error
-
-  return (data ?? []).map((s: any) => {
-    const players: Array<{ display_name: string; score: number; player_profiles: { avatar_url: string | null } | null }> =
-      s.session_players ?? []
-    const winner = players.reduce<typeof players[0] | null>(
-      (best, p) => (best === null || p.score > best.score ? p : best),
-      null,
-    )
-    return {
-      id: s.id,
-      quiz_id: s.quiz_id,
-      quiz_name: s.quizzes?.name ?? 'Unknown Quiz',
-      created_at: s.created_at,
-      winner_display_name: winner?.display_name ?? null,
-      winner_avatar_url: winner?.player_profiles?.avatar_url ?? null,
-      winner_score: winner?.score ?? null,
-    } satisfies FeaturedSession
-  })
+  return (data ?? []).map((s: any) => ({
+    id: s.id,
+    quiz_id: s.quiz_id,
+    quiz_name: s.quiz_name,
+    created_at: s.created_at,
+    winner_display_name: s.winner_display_name ?? null,
+    winner_avatar_url: s.winner_avatar_url ?? null,
+    winner_score: s.winner_score ?? null,
+  })) satisfies FeaturedSession[]
 }
 
 // ── Session players ────────────────────────────────────────
