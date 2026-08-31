@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchSessionByCode } from '../../quizzes/api/quizApi'
-import { LayoutDashboard, Trophy } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 
 export function JoinPage() {
@@ -67,15 +67,6 @@ export function JoinPage() {
       {/* dark overlay to keep text readable */}
       <div className="absolute inset-0 bg-[#080a10]/80" />
       <div className="relative z-10 flex w-full flex-col items-center">
-      {user && (
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="fixed top-4 right-4 z-20 flex items-center gap-1.5 text-xs text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
-        >
-          Dashboard
-          <LayoutDashboard className="h-4 w-4" />
-        </button>
-      )}
 
       <div className="mb-8 text-center">
         <h1
@@ -113,10 +104,21 @@ export function JoinPage() {
         </form>
         <div className="mt-6 border-t border-[#7a5c1c] pt-4">
           <p className="text-center text-sm text-[#6b5e42]">
-            Quiz host?{' '}
-            <a href="/login" className="text-[#c8a84b] hover:text-[#f0c040] transition-colors">
-              Sign in
-            </a>
+            {user ? (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-[#c8a84b] hover:text-[#f0c040] transition-colors"
+              >
+                Go to Dashboard →
+              </button>
+            ) : (
+              <>
+                Quiz host?{' '}
+                <a href="/login" className="text-[#c8a84b] hover:text-[#f0c040] transition-colors">
+                  Sign in
+                </a>
+              </>
+            )}
           </p>
         </div>
       </Card>
