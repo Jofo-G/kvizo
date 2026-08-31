@@ -340,10 +340,7 @@ export async function fetchSessionPlayers(sessionId: string): Promise<SessionPla
 // ── Answers ────────────────────────────────────────────────
 
 export async function fetchAnswersForSession(sessionId: string): Promise<Answer[]> {
-  const { data, error } = await supabase
-    .from('answers')
-    .select('*')
-    .eq('session_id', sessionId)
+  const { data, error } = await supabase.rpc('get_session_answers', { p_session_id: sessionId })
   if (error) throw error
   return data as Answer[]
 }
