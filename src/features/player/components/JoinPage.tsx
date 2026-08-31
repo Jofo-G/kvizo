@@ -7,10 +7,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchSessionByCode } from '../../quizzes/api/quizApi'
-import { Trophy } from 'lucide-react'
+import { LayoutDashboard, Trophy } from 'lucide-react'
+import { useAuth } from '../../auth/AuthProvider'
 
 export function JoinPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const [code, setCode] = useState(searchParams.get('code') ?? '')
   const [loading, setLoading] = useState(false)
@@ -65,6 +67,16 @@ export function JoinPage() {
       {/* dark overlay to keep text readable */}
       <div className="absolute inset-0 bg-[#080a10]/80" />
       <div className="relative z-10 flex w-full flex-col items-center">
+      {user && (
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="fixed top-4 right-4 z-20 flex items-center gap-1.5 text-xs text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
+        >
+          Dashboard
+          <LayoutDashboard className="h-4 w-4" />
+        </button>
+      )}
+
       <div className="mb-8 text-center">
         <h1
           className="text-5xl font-black tracking-[0.2em] text-[#f0c040]"
