@@ -10,10 +10,12 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthProvider'
 
 export function SessionResultsPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['session', sessionId],
@@ -50,7 +52,7 @@ export function SessionResultsPage() {
       <header className="border-b border-[#7a5c1c] bg-[#0c0f18]/90 backdrop-blur-sm shadow-[0_2px_15px_rgba(200,168,75,0.1)]">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
           <button
-            onClick={() => navigate(`/quizzes/${session.quiz_id}`)}
+            onClick={() => user ? navigate(`/quizzes/${session.quiz_id}`) : navigate('/')}
             className="text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />

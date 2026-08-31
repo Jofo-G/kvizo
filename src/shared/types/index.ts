@@ -83,6 +83,17 @@ export interface QuizSession {
   started_at: string | null
   finished_at: string | null
   created_at: string
+  is_featured: boolean
+}
+
+export interface FeaturedSession {
+  id: string
+  quiz_id: string
+  quiz_name: string
+  created_at: string
+  winner_display_name: string | null
+  winner_avatar_url: string | null
+  winner_score: number | null
 }
 
 export interface PlayerProfile {

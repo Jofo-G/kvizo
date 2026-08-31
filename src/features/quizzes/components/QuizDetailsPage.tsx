@@ -2,20 +2,29 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { formatDate, generateJoinCode } from '@/shared/lib/utils'
-import { createSession, fetchSessionsForQuiz } from '../../quizzes/api/quizApi'
+import { createSession, fetchSessionsForQuiz, setSessionFeatured } from '../../quizzes/api/quizApi'
 import { useQuiz } from '../hooks/useQuizzes'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Star } from 'lucide-react'
+import { useAuth } from '../../auth/AuthProvider'
 
 export function QuizDetailsPage() {
   const { quizId } = useParams<{ quizId: string }>()
   const navigate = useNavigate()
+  const { isAdmin } = useAuth()
+  const queryClient = useQueryClient()
 
   const { data: quiz, isLoading } = useQuiz(quizId!)
   const { data: sessions } = useQuery({
     queryKey: ['sessions', quizId],
     queryFn: () => fetchSessionsForQuiz(quizId!),
+  })
+
+  const featureMutation = useMutation({
+    mutationFn: ({ sessionId, featured }: { sessionId: string; featured: boolean }) =>
+      setSessionFeatured(sessionId, featured),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions', quizId] }),
   })
 
   async function handleStartSession() {
@@ -88,6 +97,22 @@ export function QuizDetailsPage() {
                         onClick={() => navigate(`/sessions/${s.id}/host`)}
                       >
                         Resume host
+                      </Button>
+                    )}
+                    {isAdmin && s.status === 'FINISHED' && (
+                      <Button
+                        size="sm"
+                        variant={s.is_featured ? 'secondary' : 'ghost'}
+                        title={s.is_featured ? 'Remove from Hall of Fame' : 'Add to Hall of Fame'}
+                        onClick={() =>
+                          featureMutation.mutate({ sessionId: s.id, featured: !s.is_featured })
+                        }
+                        disabled={featureMutation.isPending}
+                      >
+                        <Star
+                          className="h-4 w-4"
+                          fill={s.is_featured ? 'currentColor' : 'none'}
+                        />
                       </Button>
                     )}
                     <Button

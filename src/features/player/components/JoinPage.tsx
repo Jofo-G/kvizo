@@ -1,9 +1,13 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
+import { formatDate } from '@/shared/lib/utils'
+import { fetchFeaturedSessions } from '../../quizzes/api/quizApi'
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchSessionByCode } from '../../quizzes/api/quizApi'
+import { Trophy } from 'lucide-react'
 
 export function JoinPage() {
   const navigate = useNavigate()
@@ -11,6 +15,11 @@ export function JoinPage() {
   const [code, setCode] = useState(searchParams.get('code') ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const { data: featuredSessions } = useQuery({
+    queryKey: ['featuredSessions'],
+    queryFn: fetchFeaturedSessions,
+  })
 
   // Auto-submit if code came from QR link
   useEffect(() => {
@@ -99,6 +108,64 @@ export function JoinPage() {
           </p>
         </div>
       </Card>
+
+      {featuredSessions && featuredSessions.length > 0 && (
+        <div className="mt-12 w-full max-w-3xl">
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <Trophy className="h-5 w-5 text-[#f0c040]" />
+            <h2
+              className="text-lg font-bold tracking-[0.15em] text-[#f0c040]"
+              style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 10px rgba(200,168,75,0.4)' }}
+            >
+              Hall of Fame
+            </h2>
+            <Trophy className="h-5 w-5 text-[#f0c040]" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredSessions.map((session) => (
+              <button
+                key={session.id}
+                onClick={() => navigate(`/sessions/${session.id}/results`)}
+                className="group text-left w-full"
+              >
+                <Card className="flex flex-col gap-3 hover:border-[#f0c040] hover:shadow-[0_0_25px_rgba(200,168,75,0.25)] transition-all duration-200">
+                  <p
+                    className="text-sm font-bold text-[#c8a84b] truncate"
+                    style={{ fontFamily: 'Cinzel, serif' }}
+                  >
+                    {session.quiz_name}
+                  </p>
+                  <div className="flex flex-col items-center gap-2 py-2">
+                    {session.winner_avatar_url ? (
+                      <img
+                        src={session.winner_avatar_url}
+                        alt={session.winner_display_name ?? 'Winner'}
+                        className="h-16 w-16 rounded-full object-cover border-2 border-[#f0c040] shadow-[0_0_12px_rgba(200,168,75,0.4)]"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-[#1a1f2e] border-2 border-[#7a5c1c] flex items-center justify-center">
+                        <Trophy className="h-7 w-7 text-[#c8a84b]" />
+                      </div>
+                    )}
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-[#e8d5a0]">
+                        {session.winner_display_name ?? '—'}
+                      </p>
+                      {session.winner_score !== null && (
+                        <p className="text-xs text-[#9d8a5e]">{session.winner_score} pts</p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#6b5e42] text-center">
+                    {formatDate(session.created_at)}
+                  </p>
+                </Card>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       </div>
     </div>
   )

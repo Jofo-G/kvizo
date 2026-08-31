@@ -82,14 +82,7 @@ export function AppRouter() {
             />
             {/* Public leaderboard display — no auth required */}
             <Route path="/sessions/:sessionId/leaderboard" element={<HostLeaderboardPage />} />
-            <Route
-              path="/sessions/:sessionId/results"
-              element={
-                <ProtectedRoute>
-                  <SessionResultsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/sessions/:sessionId/results" element={<SessionResultsPage />} />
             <Route
               path="/admin/users"
               element={
