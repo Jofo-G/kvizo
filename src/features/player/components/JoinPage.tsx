@@ -127,7 +127,7 @@ export function JoinPage() {
               <button
                 key={session.id}
                 onClick={() => navigate(`/sessions/${session.id}/results`)}
-                className="group text-left w-full"
+                className="group text-left w-full cursor-pointer"
               >
                 <Card className="flex flex-col gap-3 hover:border-[#f0c040] hover:shadow-[0_0_25px_rgba(200,168,75,0.25)] transition-all duration-200">
                   <p
