@@ -328,17 +328,17 @@ function parseQuestion(value: unknown, index: number): QuizExportQuestion {
     throw new Error(`Question ${index + 1} has invalid text or points.`)
   }
   const options = parseItems<QuizExportQuestion['options'][number]>(value.options, index, 'option', (option) =>
-    isPositiveInteger(option.position) && typeof option.text === 'string' && typeof option.is_correct === 'boolean',
+    isRecord(option) && isPositiveInteger(option.position) && typeof option.text === 'string' && typeof option.is_correct === 'boolean',
   )
   const acceptedAnswers = parseItems<string>(value.accepted_answers, index, 'accepted answer', (answer) => typeof answer === 'string')
   const hints = parseItems<QuizExportQuestion['hints'][number]>(value.hints, index, 'hint', (hint) =>
-    isPositiveInteger(hint.position) && typeof hint.text === 'string' && isPositiveInteger(hint.points),
+    isRecord(hint) && isPositiveInteger(hint.position) && typeof hint.text === 'string' && isPositiveInteger(hint.points),
   )
   return { type: value.type as QuestionType, text: value.text, default_points: value.default_points, options, accepted_answers: acceptedAnswers, hints }
 }
 
-function parseItems<T>(value: unknown, questionIndex: number, label: string, isValid: (item: JsonRecord) => boolean): T[] {
-  if (!Array.isArray(value) || !value.every((item) => isRecord(item) && isValid(item))) {
+function parseItems<T>(value: unknown, questionIndex: number, label: string, isValid: (item: unknown) => boolean): T[] {
+  if (!Array.isArray(value) || !value.every(isValid)) {
     throw new Error(`Question ${questionIndex + 1} has an invalid ${label}.`)
   }
   return value as T[]
