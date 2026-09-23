@@ -168,7 +168,7 @@ export function HostSessionPage() {
               {players.map((p) => (
                 <div
                   key={p.id}
-                  className="flex min-w-0 flex-col items-center gap-2 rounded border border-[#7a5c1c] bg-[#10131e] px-2 py-3 text-sm text-[#c8a84b]"
+                  className="flex min-w-0 flex-col items-center gap-2 py-2 text-sm text-[#c8a84b]"
                 >
                   {p.avatar_url ? (
                     <img
