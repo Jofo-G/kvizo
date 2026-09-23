@@ -166,12 +166,23 @@ export function HostSessionPage() {
 
             <div className="flex flex-wrap gap-2 mb-6">
               {players.map((p) => (
-                <span
+                <div
                   key={p.id}
-                  className="rounded-full border border-[#7a5c1c] bg-[#10131e] px-3 py-1 text-sm text-[#c8a84b]"
+                  className="flex items-center gap-2 rounded-full border border-[#7a5c1c] bg-[#10131e] py-1 pl-1 pr-3 text-sm text-[#c8a84b]"
                 >
-                  {p.display_name}
-                </span>
+                  {p.avatar_url ? (
+                    <img
+                      src={p.avatar_url}
+                      alt={p.display_name}
+                      className="h-8 w-8 rounded-full object-cover ring-1 ring-[#c8a84b]"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0c0f18] text-sm font-bold text-[#c8a84b] ring-1 ring-[#7a5c1c]">
+                      {p.display_name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span>{p.display_name}</span>
+                </div>
               ))}
             </div>
             <Button
