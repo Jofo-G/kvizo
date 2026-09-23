@@ -2,17 +2,17 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { formatDate, generateJoinCode } from '@/shared/lib/utils'
-import { createSession, fetchSessionsForQuiz, setSessionFeatured } from '../../quizzes/api/quizApi'
+import { createSession, fetchQuizOwnerCandidates, fetchSessionsForQuiz, setQuizOwner, setSessionFeatured } from '../../quizzes/api/quizApi'
 import { useQuiz } from '../hooks/useQuizzes'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, Star } from 'lucide-react'
+import { ChevronLeft, Star, UserPlus, X } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 
 export function QuizDetailsPage() {
   const { quizId } = useParams<{ quizId: string }>()
   const navigate = useNavigate()
-  const { isAdmin } = useAuth()
+  const { isAdmin, user } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: quiz, isLoading } = useQuiz(quizId!)
@@ -20,11 +20,22 @@ export function QuizDetailsPage() {
     queryKey: ['sessions', quizId],
     queryFn: () => fetchSessionsForQuiz(quizId!),
   })
+  const isQuizCreator = quiz?.owner_user_id === user?.id
+  const { data: ownerCandidates } = useQuery({
+    queryKey: ['quiz-owner-candidates', quizId],
+    queryFn: () => fetchQuizOwnerCandidates(quizId!),
+    enabled: isQuizCreator,
+  })
 
   const featureMutation = useMutation({
     mutationFn: ({ sessionId, featured }: { sessionId: string; featured: boolean }) =>
       setSessionFeatured(sessionId, featured),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions', quizId] }),
+  })
+  const ownerMutation = useMutation({
+    mutationFn: ({ userId, isOwner }: { userId: string; isOwner: boolean }) =>
+      setQuizOwner(quizId!, userId, isOwner),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quiz-owner-candidates', quizId] }),
   })
 
   async function handleStartSession() {
@@ -62,6 +73,52 @@ export function QuizDetailsPage() {
         {quiz?.description && (
           <Card>
             <p className="text-[#9d8a5e]">{quiz.description}</p>
+          </Card>
+        )}
+
+        {isQuizCreator && (
+          <Card className="flex flex-col gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>Quiz Owners</h2>
+              <p className="mt-1 text-sm text-[#9d8a5e]">Owners can edit this quiz and create or manage its sessions.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {ownerCandidates?.filter((candidate) => candidate.is_owner).map((candidate) => (
+                <span key={candidate.user_id} className="flex items-center gap-1.5 rounded border border-[#7a5c1c] bg-[#080a10] px-2.5 py-1.5 text-sm text-[#e8d5a0]">
+                  {candidate.email}
+                  {candidate.user_id !== user?.id && (
+                    <button
+                      type="button"
+                      title={`Remove ${candidate.email} as owner`}
+                      aria-label={`Remove ${candidate.email} as owner`}
+                      onClick={() => ownerMutation.mutate({ userId: candidate.user_id, isOwner: false })}
+                      disabled={ownerMutation.isPending}
+                      className="text-[#9d8a5e] hover:text-red-400 disabled:opacity-40"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
+            <label className="flex max-w-md items-center gap-2">
+              <span className="sr-only">Add quiz owner</span>
+              <select
+                value=""
+                onChange={(event) => {
+                  if (event.target.value) ownerMutation.mutate({ userId: event.target.value, isOwner: true })
+                }}
+                disabled={ownerMutation.isPending}
+                className="min-w-0 flex-1 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-2 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] disabled:opacity-40"
+              >
+                <option value="">Add a registered user...</option>
+                {ownerCandidates?.filter((candidate) => !candidate.is_owner).map((candidate) => (
+                  <option key={candidate.user_id} value={candidate.user_id}>{candidate.email}</option>
+                ))}
+              </select>
+              <UserPlus className="h-5 w-5 shrink-0 text-[#c8a84b]" aria-hidden="true" />
+            </label>
+            {ownerMutation.error && <p role="alert" className="text-sm text-red-400">Could not update quiz owners.</p>}
           </Card>
         )}
 

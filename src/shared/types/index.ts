@@ -29,6 +29,12 @@ export interface QuizMember {
   created_at: string
 }
 
+export interface QuizOwnerCandidate {
+  user_id: string
+  email: string
+  is_owner: boolean
+}
+
 export interface Question {
   id: string
   quiz_id: string

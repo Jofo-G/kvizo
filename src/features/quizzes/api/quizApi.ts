@@ -1,5 +1,5 @@
 import { supabase } from '@/supabase/client'
-import type { AcceptedAnswer, Answer, FeaturedSession, Question, QuestionHint, QuestionOption, Quiz, QuizExport, QuizExportQuestion, QuizSession, SessionPlayer } from '@/shared/types'
+import type { AcceptedAnswer, Answer, FeaturedSession, Question, QuestionHint, QuestionOption, Quiz, QuizExport, QuizExportQuestion, QuizOwnerCandidate, QuizSession, SessionPlayer } from '@/shared/types'
 
 // ── Quizzes ────────────────────────────────────────────────
 
@@ -41,6 +41,21 @@ export async function updateQuiz(quizId: string, updates: Partial<Pick<Quiz, 'na
 
 export async function deleteQuiz(quizId: string): Promise<void> {
   const { error } = await supabase.from('quizzes').delete().eq('id', quizId)
+  if (error) throw error
+}
+
+export async function fetchQuizOwnerCandidates(quizId: string): Promise<QuizOwnerCandidate[]> {
+  const { data, error } = await supabase.rpc('list_quiz_owner_candidates', { p_quiz_id: quizId })
+  if (error) throw error
+  return data as QuizOwnerCandidate[]
+}
+
+export async function setQuizOwner(quizId: string, userId: string, isOwner: boolean): Promise<void> {
+  const { error } = await supabase.rpc('set_quiz_owner', {
+    p_quiz_id: quizId,
+    p_user_id: userId,
+    p_is_owner: isOwner,
+  })
   if (error) throw error
 }
 
