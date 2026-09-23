@@ -20,7 +20,7 @@ begin
   return query
   select
     users.id,
-    users.email,
+    users.email::text,
     exists (
       select 1 from public.quiz_members members
       where members.quiz_id = p_quiz_id
