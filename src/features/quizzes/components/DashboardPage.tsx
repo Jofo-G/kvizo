@@ -17,6 +17,7 @@ export function DashboardPage() {
 
   const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -67,6 +68,8 @@ export function DashboardPage() {
           </h2>
           <Button onClick={() => setCreating(true)}>+ New Quiz</Button>
         </div>
+
+        {deleteError && <p role="alert" className="mb-6 rounded border border-red-500/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">{deleteError}</p>}
 
         {creating && (
           <Card className="mb-6">
@@ -125,9 +128,14 @@ export function DashboardPage() {
                     size="sm"
                     variant="danger"
                     disabled={deleteMutation.isPending}
-                    onClick={() => {
+                    onClick={async () => {
                       if (confirm(`Delete "${quiz.name}"?`)) {
-                        deleteMutation.mutate(quiz.id)
+                        setDeleteError(null)
+                        try {
+                          await deleteMutation.mutateAsync(quiz.id)
+                        } catch (error) {
+                          setDeleteError(error instanceof Error ? error.message : 'Could not delete quiz.')
+                        }
                       }
                     }}
                   >
