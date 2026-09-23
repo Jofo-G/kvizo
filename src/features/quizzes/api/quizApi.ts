@@ -132,31 +132,13 @@ export async function exportQuiz(quiz: Quiz, questions: Question[]): Promise<Qui
 
 export async function replaceQuizFromExport(
   quizId: string,
-  existingQuestions: Question[],
   importedQuiz: QuizExport,
 ): Promise<void> {
-  const newQuestionIds: string[] = []
-  try {
-    for (const [index, importedQuestion] of importedQuiz.questions.entries()) {
-      const question = await createQuestion(quizId, index + 1, importedQuestion.type)
-      newQuestionIds.push(question.id)
-      await updateQuestion(question.id, {
-        text: importedQuestion.text,
-        default_points: importedQuestion.default_points,
-      })
-      if (importedQuestion.options.length) await upsertOptions(question.id, importedQuestion.options)
-      if (importedQuestion.accepted_answers.length) {
-        await upsertAcceptedAnswers(question.id, importedQuestion.accepted_answers)
-      }
-      if (importedQuestion.hints.length) await upsertHints(question.id, importedQuestion.hints)
-    }
-  } catch (error) {
-    await Promise.all(newQuestionIds.map((id) => deleteQuestion(id)))
-    throw error
-  }
-
-  await Promise.all(existingQuestions.map((question) => deleteQuestion(question.id)))
-  await updateQuiz(quizId, importedQuiz.quiz)
+  const { error } = await supabase.rpc('replace_quiz_from_export', {
+    p_quiz_id: quizId,
+    p_quiz: importedQuiz,
+  })
+  if (error) throw error
 }
 
 export async function adjustPlayerScore(sessionPlayerId: string, delta: number): Promise<void> {

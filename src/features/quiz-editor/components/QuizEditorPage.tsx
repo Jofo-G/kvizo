@@ -135,7 +135,7 @@ export function QuizEditorPage() {
       const importedQuiz = parseQuizExport(JSON.parse(await file.text()))
       if (!confirm(`Replace this quiz with "${importedQuiz.quiz.name}" and its ${importedQuiz.questions.length} question(s)? This cannot be undone.`)) return
       setTransferring(true)
-      await replaceQuizFromExport(quizId!, questions ?? [], importedQuiz)
+      await replaceQuizFromExport(quizId!, importedQuiz)
       await qc.invalidateQueries({ queryKey: ['quiz', quizId] })
       await qc.invalidateQueries({ queryKey: ['questions', quizId] })
     } catch (error) {
