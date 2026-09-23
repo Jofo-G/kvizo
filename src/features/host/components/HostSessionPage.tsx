@@ -12,7 +12,7 @@ import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Users } from 'lucide-react'
+import { Trophy, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function HostSessionPage() {
@@ -164,24 +164,24 @@ export function HostSessionPage() {
               <p className="text-sm text-[#9d8a5e] font-mono">{window.location.origin}/join</p>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6 sm:grid-cols-4">
               {players.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-2 rounded-full border border-[#7a5c1c] bg-[#10131e] py-1 pl-1 pr-3 text-sm text-[#c8a84b]"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded border border-[#7a5c1c] bg-[#10131e] px-2 py-3 text-sm text-[#c8a84b]"
                 >
                   {p.avatar_url ? (
                     <img
                       src={p.avatar_url}
                       alt={p.display_name}
-                      className="h-8 w-8 rounded-full object-cover ring-1 ring-[#c8a84b]"
+                      className="h-14 w-14 rounded-full object-cover border-2 border-[#f0c040] shadow-[0_0_12px_rgba(200,168,75,0.4)]"
                     />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0c0f18] text-sm font-bold text-[#c8a84b] ring-1 ring-[#7a5c1c]">
-                      {p.display_name.charAt(0).toUpperCase()}
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#7a5c1c] bg-[#1a1f2e]">
+                      <Trophy className="h-6 w-6 text-[#c8a84b]" />
                     </div>
                   )}
-                  <span>{p.display_name}</span>
+                  <span className="w-full truncate text-center">{p.display_name}</span>
                 </div>
               ))}
             </div>
