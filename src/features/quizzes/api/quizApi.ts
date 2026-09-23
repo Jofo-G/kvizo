@@ -1,5 +1,5 @@
 import { supabase } from '@/supabase/client'
-import type { AcceptedAnswer, Answer, FeaturedSession, Question, QuestionHint, QuestionOption, Quiz, QuizSession, SessionPlayer } from '@/shared/types'
+import type { AcceptedAnswer, Answer, FeaturedSession, Question, QuestionHint, QuestionOption, Quiz, QuizExport, QuizExportQuestion, QuizSession, SessionPlayer } from '@/shared/types'
 
 // ── Quizzes ────────────────────────────────────────────────
 
@@ -84,6 +84,64 @@ export async function updateQuestion(
 export async function deleteQuestion(questionId: string): Promise<void> {
   const { error } = await supabase.from('questions').delete().eq('id', questionId)
   if (error) throw error
+}
+
+export async function exportQuiz(quiz: Quiz, questions: Question[]): Promise<QuizExport> {
+  const exportedQuestions = await Promise.all(
+    questions.map(async (question) => {
+      const [options, acceptedAnswers, hints] = await Promise.all([
+        question.type === 'MULTIPLE_CHOICE' ? fetchOptions(question.id) : Promise.resolve([]),
+        question.type === 'OPEN' || question.type === 'PROGRESSIVE_HINTS'
+          ? fetchAcceptedAnswers(question.id)
+          : Promise.resolve([]),
+        question.type === 'PROGRESSIVE_HINTS' ? fetchHints(question.id) : Promise.resolve([]),
+      ])
+
+      return {
+        type: question.type,
+        text: question.text,
+        default_points: question.default_points,
+        options: options.map(({ position, text, is_correct }) => ({ position, text, is_correct })),
+        accepted_answers: acceptedAnswers.map(({ answer }) => answer),
+        hints: hints.map(({ position, text, points }) => ({ position, text, points })),
+      } satisfies QuizExportQuestion
+    }),
+  )
+
+  return {
+    version: 1,
+    quiz: { name: quiz.name, description: quiz.description },
+    questions: exportedQuestions,
+  }
+}
+
+export async function replaceQuizFromExport(
+  quizId: string,
+  existingQuestions: Question[],
+  importedQuiz: QuizExport,
+): Promise<void> {
+  const newQuestionIds: string[] = []
+  try {
+    for (const [index, importedQuestion] of importedQuiz.questions.entries()) {
+      const question = await createQuestion(quizId, index + 1, importedQuestion.type)
+      newQuestionIds.push(question.id)
+      await updateQuestion(question.id, {
+        text: importedQuestion.text,
+        default_points: importedQuestion.default_points,
+      })
+      if (importedQuestion.options.length) await upsertOptions(question.id, importedQuestion.options)
+      if (importedQuestion.accepted_answers.length) {
+        await upsertAcceptedAnswers(question.id, importedQuestion.accepted_answers)
+      }
+      if (importedQuestion.hints.length) await upsertHints(question.id, importedQuestion.hints)
+    }
+  } catch (error) {
+    await Promise.all(newQuestionIds.map((id) => deleteQuestion(id)))
+    throw error
+  }
+
+  await Promise.all(existingQuestions.map((question) => deleteQuestion(question.id)))
+  await updateQuiz(quizId, importedQuiz.quiz)
 }
 
 export async function adjustPlayerScore(sessionPlayerId: string, delta: number): Promise<void> {

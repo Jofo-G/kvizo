@@ -71,6 +71,25 @@ export interface QuestionHint {
   points: number
 }
 
+/** Portable, ID-free representation used for quiz JSON import/export. */
+export interface QuizExport {
+  version: 1
+  quiz: {
+    name: string
+    description: string | null
+  }
+  questions: QuizExportQuestion[]
+}
+
+export interface QuizExportQuestion {
+  type: QuestionType
+  text: string | null
+  default_points: number | null
+  options: Array<Pick<QuestionOption, 'position' | 'text' | 'is_correct'>>
+  accepted_answers: string[]
+  hints: Array<Pick<QuestionHint, 'position' | 'text' | 'points'>>
+}
+
 export interface QuizSession {
   id: string
   quiz_id: string

@@ -2,20 +2,24 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import type { Question, QuestionType } from '@/shared/types'
+import type { Question, QuestionType, QuizExportQuestion } from '@/shared/types'
 import {
     createQuestion,
     deleteQuestion,
+  exportQuiz,
     fetchQuestions,
+  replaceQuizFromExport,
     updateQuestion,
 } from '../../quizzes/api/quizApi'
 import { useQuiz, useUpdateQuiz } from '../../quizzes/hooks/useQuizzes'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronLeft, Download, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { BulkAddPanel } from './BulkAddPanel'
 import { useNavigate, useParams } from 'react-router-dom'
 import { QuestionEditor } from './QuestionEditor'
+
+type JsonRecord = Record<string, unknown>
 
 const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
@@ -41,6 +45,9 @@ export function QuizEditorPage() {
   const [editingMeta, setEditingMeta] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const [transferring, setTransferring] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   // Init local state from loaded quiz
   const displayName = quiz?.name ?? ''
@@ -81,7 +88,11 @@ export function QuizEditorPage() {
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
   }
@@ -99,6 +110,40 @@ export function QuizEditorPage() {
     setSelectedIds(new Set())
     setSelectMode(false)
     qc.invalidateQueries({ queryKey: ['questions', quizId] })
+  }
+
+  function downloadExport() {
+    if (!quiz) return
+    setTransferError(null)
+    setTransferring(true)
+    exportQuiz(quiz, questions ?? [])
+      .then((data) => {
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${quiz.name.trim().replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'quiz'}.json`
+        link.click()
+        URL.revokeObjectURL(url)
+      })
+      .catch(() => setTransferError('Could not export this quiz. Please try again.'))
+      .finally(() => setTransferring(false))
+  }
+
+  async function handleImport(file: File) {
+    try {
+      setTransferError(null)
+      const importedQuiz = parseQuizExport(JSON.parse(await file.text()))
+      if (!confirm(`Replace this quiz with "${importedQuiz.quiz.name}" and its ${importedQuiz.questions.length} question(s)? This cannot be undone.`)) return
+      setTransferring(true)
+      await replaceQuizFromExport(quizId!, questions ?? [], importedQuiz)
+      await qc.invalidateQueries({ queryKey: ['quiz', quizId] })
+      await qc.invalidateQueries({ queryKey: ['questions', quizId] })
+    } catch (error) {
+      setTransferError(error instanceof Error ? error.message : 'Could not import that file.')
+    } finally {
+      setTransferring(false)
+      if (importInputRef.current) importInputRef.current.value = ''
+    }
   }
 
   if (quizLoading || questionsLoading) return <LoadingSpinner />
@@ -120,22 +165,35 @@ export function QuizEditorPage() {
             {editingMeta ? 'Edit Quiz Info' : displayName}
           </h1>
           {!editingMeta && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setName(displayName)
-                setDescription(displayDesc)
-                setEditingMeta(true)
-              }}
-            >
-              Edit info
-            </Button>
+            <div className="ml-auto flex items-center gap-1">
+              <button type="button" title="Export quiz JSON" aria-label="Export quiz JSON" onClick={downloadExport} disabled={transferring} className="p-2 text-[#9d8a5e] hover:text-[#c8a84b] disabled:opacity-40 transition-colors">
+                <Download className="h-4 w-4" />
+              </button>
+              <button type="button" title="Import quiz JSON" aria-label="Import quiz JSON" onClick={() => importInputRef.current?.click()} disabled={transferring} className="p-2 text-[#9d8a5e] hover:text-[#c8a84b] disabled:opacity-40 transition-colors">
+                <Upload className="h-4 w-4" />
+              </button>
+              <input ref={importInputRef} type="file" accept="application/json,.json" className="hidden" onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (file) void handleImport(file)
+              }} />
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setName(displayName)
+                  setDescription(displayDesc)
+                  setEditingMeta(true)
+                }}
+              >
+                Edit info
+              </Button>
+            </div>
           )}
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 flex flex-col gap-6">
+        {transferError && <p role="alert" className="rounded border border-red-500/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">{transferError}</p>}
         {/* Meta edit */}
         {editingMeta && (
           <Card>
@@ -245,4 +303,51 @@ export function QuizEditorPage() {
       </div>
     </div>
   )
+}
+
+function parseQuizExport(value: unknown) {
+  if (!isRecord(value) || value.version !== 1 || !isRecord(value.quiz) || !Array.isArray(value.questions)) {
+    throw new Error('This is not a supported Kvizo quiz export.')
+  }
+  if (typeof value.quiz.name !== 'string' || !value.quiz.name.trim() || (value.quiz.description !== null && typeof value.quiz.description !== 'string')) {
+    throw new Error('The quiz name or description is invalid.')
+  }
+
+  return {
+    version: 1 as const,
+    quiz: { name: value.quiz.name.trim(), description: value.quiz.description },
+    questions: value.questions.map((question, index) => parseQuestion(question, index)),
+  }
+}
+
+function parseQuestion(value: unknown, index: number): QuizExportQuestion {
+  if (!isRecord(value) || !['MULTIPLE_CHOICE', 'OPEN', 'PROGRESSIVE_HINTS', 'FOLLOW_UP', 'PAUSE'].includes(String(value.type))) {
+    throw new Error(`Question ${index + 1} has an invalid type.`)
+  }
+  if ((value.text !== null && typeof value.text !== 'string') || (value.default_points !== null && !isPositiveInteger(value.default_points))) {
+    throw new Error(`Question ${index + 1} has invalid text or points.`)
+  }
+  const options = parseItems<QuizExportQuestion['options'][number]>(value.options, index, 'option', (option) =>
+    isPositiveInteger(option.position) && typeof option.text === 'string' && typeof option.is_correct === 'boolean',
+  )
+  const acceptedAnswers = parseItems<string>(value.accepted_answers, index, 'accepted answer', (answer) => typeof answer === 'string')
+  const hints = parseItems<QuizExportQuestion['hints'][number]>(value.hints, index, 'hint', (hint) =>
+    isPositiveInteger(hint.position) && typeof hint.text === 'string' && isPositiveInteger(hint.points),
+  )
+  return { type: value.type as QuestionType, text: value.text, default_points: value.default_points, options, accepted_answers: acceptedAnswers, hints }
+}
+
+function parseItems<T>(value: unknown, questionIndex: number, label: string, isValid: (item: JsonRecord) => boolean): T[] {
+  if (!Array.isArray(value) || !value.every((item) => isRecord(item) && isValid(item))) {
+    throw new Error(`Question ${questionIndex + 1} has an invalid ${label}.`)
+  }
+  return value as T[]
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0
 }
