@@ -18,7 +18,7 @@ export function JoinPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { data: featuredSessions } = useQuery({
+  const { data: featuredSessions, isLoading: featuredSessionsLoading } = useQuery({
     queryKey: ['featuredSessions'],
     queryFn: fetchFeaturedSessions,
   })
@@ -123,21 +123,29 @@ export function JoinPage() {
         </div>
       </Card>
 
-      {featuredSessions && featuredSessions.length > 0 && (
-        <div className="mt-12 w-full max-w-3xl">
-          <div className="mb-4 flex items-center justify-center gap-2">
-            <Trophy className="h-5 w-5 text-[#f0c040]" />
-            <h2
-              className="text-lg font-bold tracking-[0.15em] text-[#f0c040]"
-              style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 10px rgba(200,168,75,0.4)' }}
-            >
-              Hall of Fame
-            </h2>
-            <Trophy className="h-5 w-5 text-[#f0c040]" />
-          </div>
+      <div className="mt-12 w-full max-w-3xl">
+        <div className="mb-4 flex items-center justify-center gap-2">
+          <Trophy className="h-5 w-5 text-[#f0c040]" />
+          <h2
+            className="text-lg font-bold tracking-[0.15em] text-[#f0c040]"
+            style={{ fontFamily: 'Cinzel, serif', textShadow: '0 0 10px rgba(200,168,75,0.4)' }}
+          >
+            Hall of Fame
+          </h2>
+          <Trophy className="h-5 w-5 text-[#f0c040]" />
+        </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredSessions.map((session) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredSessionsLoading
+            ? Array.from({ length: 3 }, (_, index) => (
+              <Card key={index} className="flex flex-col gap-4 animate-pulse">
+                <div className="h-4 w-3/4 rounded bg-[#7a5c1c]/40" />
+                <div className="mx-auto h-16 w-16 rounded-full bg-[#7a5c1c]/40" />
+                <div className="mx-auto h-4 w-1/2 rounded bg-[#7a5c1c]/40" />
+                <div className="mx-auto h-3 w-1/3 rounded bg-[#7a5c1c]/40" />
+              </Card>
+            ))
+            : featuredSessions?.map((session) => (
               <button
                 key={session.id}
                 onClick={() => navigate(`/sessions/${session.id}/results`)}
@@ -177,9 +185,8 @@ export function JoinPage() {
                 </Card>
               </button>
             ))}
-          </div>
         </div>
-      )}
+      </div>
       </div>
     </div>
   )
