@@ -138,7 +138,7 @@ export function JoinPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {featuredSessionsLoading
             ? Array.from({ length: 3 }, (_, index) => (
-              <Card key={index} className="flex flex-col gap-4 animate-pulse">
+              <Card key={index} className="flex min-h-[232px] flex-col gap-4 animate-pulse">
                 <div className="h-4 w-3/4 rounded bg-[#7a5c1c]/40" />
                 <div className="mx-auto h-16 w-16 rounded-full bg-[#7a5c1c]/40" />
                 <div className="mx-auto h-4 w-1/2 rounded bg-[#7a5c1c]/40" />
@@ -151,7 +151,7 @@ export function JoinPage() {
                 onClick={() => navigate(`/sessions/${session.id}/results`)}
                 className="group text-left w-full cursor-pointer"
               >
-                <Card className="flex flex-col gap-3 hover:border-[#f0c040] hover:shadow-[0_0_25px_rgba(200,168,75,0.25)] transition-all duration-200">
+                <Card className="flex min-h-[232px] flex-col gap-3 hover:border-[#f0c040] hover:shadow-[0_0_25px_rgba(200,168,75,0.25)] transition-all duration-200">
                   <p
                     className="text-sm font-bold text-[#c8a84b] truncate"
                     style={{ fontFamily: 'Cinzel, serif' }}
@@ -170,7 +170,7 @@ export function JoinPage() {
                         <Trophy className="h-7 w-7 text-[#c8a84b]" />
                       </div>
                     )}
-                    <div className="text-center">
+                    <div className="min-h-10 text-center">
                       <p className="text-sm font-semibold text-[#e8d5a0]">
                         {session.winner_display_name ?? '—'}
                       </p>
