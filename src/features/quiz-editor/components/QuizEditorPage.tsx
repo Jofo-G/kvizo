@@ -1,5 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { Question, QuestionType, QuizExportQuestion } from '@/shared/types'
@@ -20,6 +21,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { QuestionEditor } from './QuestionEditor'
 
 type JsonRecord = Record<string, unknown>
+type Confirmation = {
+  message: string
+  confirmLabel: string
+  onConfirm: () => void | Promise<void>
+}
 
 const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
@@ -49,6 +55,7 @@ export function QuizEditorPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [transferError, setTransferError] = useState<string | null>(null)
   const [transferring, setTransferring] = useState(false)
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
 
   // Init local state from loaded quiz
@@ -101,7 +108,14 @@ export function QuizEditorPage() {
 
   async function handleBulkDelete() {
     if (!selectedIds.size) return
-    if (!confirm(`Delete ${selectedIds.size} question(s)?`)) return
+    setConfirmation({
+      message: `Delete ${selectedIds.size} question(s)?`,
+      confirmLabel: 'Delete questions',
+      onConfirm: deleteSelectedQuestions,
+    })
+  }
+
+  async function deleteSelectedQuestions() {
     await Promise.all([...selectedIds].map((id) => deleteQuestion(id)))
     const remaining = (questions ?? []).filter((q) => !selectedIds.has(q.id))
     await Promise.all(
@@ -135,11 +149,23 @@ export function QuizEditorPage() {
     try {
       setTransferError(null)
       const importedQuiz = parseQuizExport(JSON.parse(await file.text()))
-      if (!confirm(`Replace this quiz with "${importedQuiz.quiz.name}" and its ${importedQuiz.questions.length} question(s)? This cannot be undone.`)) return
-      setTransferring(true)
-      await replaceQuizFromExport(quizId!, importedQuiz)
-      await qc.invalidateQueries({ queryKey: ['quiz', quizId] })
-      await qc.invalidateQueries({ queryKey: ['questions', quizId] })
+      setConfirmation({
+        message: `Replace this quiz with "${importedQuiz.quiz.name}" and its ${importedQuiz.questions.length} question(s)? This cannot be undone.`,
+        confirmLabel: 'Replace quiz',
+        onConfirm: async () => {
+          setTransferring(true)
+          try {
+            await replaceQuizFromExport(quizId!, importedQuiz)
+            await qc.invalidateQueries({ queryKey: ['quiz', quizId] })
+            await qc.invalidateQueries({ queryKey: ['questions', quizId] })
+            setConfirmation(null)
+          } catch (error) {
+            setTransferError(error instanceof Error ? error.message : 'Could not import that file.')
+          } finally {
+            setTransferring(false)
+          }
+        },
+      })
     } catch (error) {
       setTransferError(error instanceof Error ? error.message : 'Could not import that file.')
     } finally {
@@ -303,6 +329,18 @@ export function QuizEditorPage() {
         </Card>
       </main>
       </div>
+      <ConfirmDialog
+        open={!!confirmation}
+        title="Are you sure?"
+        message={confirmation?.message ?? ''}
+        confirmLabel={confirmation?.confirmLabel}
+        onConfirm={async () => {
+          if (!confirmation) return
+          await confirmation.onConfirm()
+          if (confirmation.confirmLabel === 'Delete questions') setConfirmation(null)
+        }}
+        onCancel={() => setConfirmation(null)}
+      />
     </div>
   )
 }

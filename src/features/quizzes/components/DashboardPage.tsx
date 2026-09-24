@@ -1,5 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useState } from 'react'
@@ -19,6 +20,7 @@ export function DashboardPage() {
   const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [quizToDelete, setQuizToDelete] = useState<{ id: string; name: string } | null>(null)
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -138,16 +140,7 @@ export function DashboardPage() {
                     size="sm"
                     variant="danger"
                     disabled={deleteMutation.isPending}
-                    onClick={async () => {
-                      if (confirm(`Delete "${quiz.name}"?`)) {
-                        setDeleteError(null)
-                        try {
-                          await deleteMutation.mutateAsync(quiz.id)
-                        } catch (error) {
-                          setDeleteError(error instanceof Error ? error.message : 'Could not delete quiz.')
-                        }
-                      }
-                    }}
+                    onClick={() => setQuizToDelete({ id: quiz.id, name: quiz.name })}
                   >
                     Delete
                   </Button>
@@ -158,6 +151,23 @@ export function DashboardPage() {
         )}
       </main>
       </div>
+      <ConfirmDialog
+        open={!!quizToDelete}
+        title="Delete quiz?"
+        message={quizToDelete ? `Delete "${quizToDelete.name}"?` : ''}
+        confirmLabel="Delete quiz"
+        onConfirm={async () => {
+          if (!quizToDelete) return
+          setDeleteError(null)
+          try {
+            await deleteMutation.mutateAsync(quizToDelete.id)
+            setQuizToDelete(null)
+          } catch (error) {
+            setDeleteError(error instanceof Error ? error.message : 'Could not delete quiz.')
+          }
+        }}
+        onCancel={() => setQuizToDelete(null)}
+      />
     </div>
   )
 }

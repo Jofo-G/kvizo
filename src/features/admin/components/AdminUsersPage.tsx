@@ -1,5 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { PlayerProfile } from '@/shared/types'
@@ -71,6 +72,7 @@ export function AdminUsersPage() {
   const [newName, setNewName] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [profileToDelete, setProfileToDelete] = useState<PlayerProfile | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -203,9 +205,7 @@ export function AdminUsersPage() {
                   {p.name}
                 </p>
                 <button
-                  onClick={() => {
-                    if (confirm(`Remove player "${p.name}"?`)) deleteMutation.mutate(p.id)
-                  }}
+                  onClick={() => setProfileToDelete(p)}
                   disabled={deleteMutation.isPending}
                   className="mt-1 text-xs text-red-400 hover:underline disabled:opacity-40 transition-colors"
                 >
@@ -217,6 +217,18 @@ export function AdminUsersPage() {
         )}
       </main>
       </div>
+      <ConfirmDialog
+        open={!!profileToDelete}
+        title="Remove player?"
+        message={profileToDelete ? `Remove player "${profileToDelete.name}"?` : ''}
+        confirmLabel="Remove player"
+        onConfirm={async () => {
+          if (!profileToDelete) return
+          await deleteMutation.mutateAsync(profileToDelete.id)
+          setProfileToDelete(null)
+        }}
+        onCancel={() => setProfileToDelete(null)}
+      />
     </div>
   )
 }

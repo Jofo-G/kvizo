@@ -1,5 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
     adjustPlayerScore,
@@ -89,6 +90,7 @@ export function HostSessionPage() {
 
   // admin points panel — lets the host adjust any player's score at any time
   const [showAdminPanel, setShowAdminPanel] = useState(false)
+  const [showFinishConfirmation, setShowFinishConfirmation] = useState(false)
   const [adminInputs, setAdminInputs] = useState<Record<string, string>>({})
   const [adminLoading, setAdminLoading] = useState<Record<string, boolean>>({})
 
@@ -193,9 +195,7 @@ export function HostSessionPage() {
               variant="danger"
               size="sm"
               className="order-last sm:order-none"
-              onClick={() => {
-                if (confirm('Finish the session?')) finishSession()
-              }}
+              onClick={() => setShowFinishConfirmation(true)}
             >
               <span className="sm:hidden">FINISH</span>
               <span className="hidden sm:inline">FINISH SESSION</span>
@@ -606,6 +606,17 @@ export function HostSessionPage() {
           </Card>
         </div>
       )}
+      <ConfirmDialog
+        open={showFinishConfirmation}
+        title="Finish session?"
+        message="Players will no longer be able to answer this session."
+        confirmLabel="Finish session"
+        onConfirm={async () => {
+          await finishSession()
+          setShowFinishConfirmation(false)
+        }}
+        onCancel={() => setShowFinishConfirmation(false)}
+      />
     </div>
   )
 }

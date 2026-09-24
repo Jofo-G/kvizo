@@ -1,5 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { Input } from '@/shared/components/Input'
 import type { AcceptedAnswer, Question, QuestionHint, QuestionOption } from '@/shared/types'
 import {
@@ -39,6 +40,7 @@ export function QuestionEditor({
   const [text, setText] = useState(question.text ?? '')
   const [defaultPoints, setDefaultPoints] = useState(question.default_points ?? 1)
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
   // Multiple choice options
   const [options, setOptions] = useState<Array<Omit<QuestionOption, 'id' | 'question_id'>>>([])
@@ -125,15 +127,25 @@ export function QuestionEditor({
             <ChevronDown className="h-4 w-4" />
           </button>
           <button
-            onClick={() => {
-              if (confirm('Delete this question?')) onDelete()
-            }}
+            onClick={() => setShowDeleteConfirmation(true)}
             className="p-1 text-red-600 hover:text-red-400 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirmation}
+        title="Delete question?"
+        message="This question and its answer settings will be deleted."
+        confirmLabel="Delete question"
+        onConfirm={() => {
+          onDelete()
+          setShowDeleteConfirmation(false)
+        }}
+        onCancel={() => setShowDeleteConfirmation(false)}
+      />
 
       {!collapsed && (
         <div className="flex flex-col gap-5">
