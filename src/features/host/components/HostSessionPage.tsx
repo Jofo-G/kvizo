@@ -14,10 +14,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Settings, Trophy, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../auth/AuthProvider'
 
 export function HostSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
+  const { isAdmin } = useAuth()
   const {
     session,
     players,
@@ -165,15 +167,15 @@ export function HostSessionPage() {
       <div className="absolute inset-0 bg-[#080a10]/78" />
       <div className="relative z-10 flex flex-col min-h-screen">
       {/* Header */}
-      <header className="border-b border-[#7a5c1c] px-6 py-4 flex items-center justify-between shadow-[0_2px_15px_rgba(200,168,75,0.1)] bg-[#0c0f18]/90 backdrop-blur-sm">
+      <header className="flex flex-col gap-3 border-b border-[#7a5c1c] bg-[#0c0f18]/90 px-3 py-3 shadow-[0_2px_15px_rgba(200,168,75,0.1)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-[#9d8a5e]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
-          <p className="text-2xl font-bold" style={{ fontFamily: 'Cinzel, serif' }}>
+          <p className="text-[0.65rem] uppercase tracking-[0.2em] text-[#9d8a5e] sm:text-xs sm:tracking-[0.25em]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
+          <p className="text-xl font-bold sm:text-2xl" style={{ fontFamily: 'Cinzel, serif' }}>
             ROOM:{' '}
             <span className="font-mono text-[#f0c040]" style={{ textShadow: '0 0 10px rgba(200,168,75,0.5)' }}>{session.join_code}</span>
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-4">
           <div className="flex items-center gap-2 text-[#9d8a5e]">
             <Users className="h-5 w-5" />
             <span className="text-lg font-semibold text-[#c8a84b]">{players.length}</span>
@@ -185,11 +187,24 @@ export function HostSessionPage() {
           >
             <Settings className="h-5 w-5" />
           </button>
+          {isRunning && (
+            <Button
+              variant="danger"
+              size="sm"
+              className="order-last sm:order-none"
+              onClick={() => {
+                if (confirm('Finish the session?')) finishSession()
+              }}
+            >
+              <span className="sm:hidden">FINISH</span>
+              <span className="hidden sm:inline">FINISH SESSION</span>
+            </Button>
+          )}
           <a
             href={`/sessions/${sessionId}/leaderboard`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded border border-[#c8a84b] bg-[#10131e] px-3 py-1.5 text-sm font-semibold text-[#c8a84b] transition-all hover:border-[#f0c040] hover:text-[#f0c040] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]"
+            className={`${isAdmin ? 'hidden md:inline-flex' : 'inline-flex'} rounded border border-[#c8a84b] bg-[#10131e] px-3 py-1.5 text-sm font-semibold text-[#c8a84b] transition-all hover:border-[#f0c040] hover:text-[#f0c040] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]`}
           >
             Open Leaderboard ↗
           </a>
@@ -323,15 +338,6 @@ export function HostSessionPage() {
                       )}
                     </>
                   )}
-                  <Button
-                    variant="danger"
-                    size="lg"
-                    onClick={() => {
-                      if (confirm('Finish the session?')) finishSession()
-                    }}
-                  >
-                    FINISH SESSION
-                  </Button>
                 </div>
               </Card>
             )}
