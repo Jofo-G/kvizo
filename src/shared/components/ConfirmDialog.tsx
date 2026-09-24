@@ -60,10 +60,10 @@ export function ConfirmDialog({
           {message}
         </p>
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={onCancel} disabled={confirming}>
+          <Button variant="ghost" size="md" className="min-w-28" onClick={onCancel} disabled={confirming}>
             {cancelLabel}
           </Button>
-          <Button variant="danger" size="sm" onClick={handleConfirm} disabled={confirming}>
+          <Button variant="danger" size="md" className="min-w-28" onClick={handleConfirm} disabled={confirming}>
             {confirming ? 'Working…' : confirmLabel}
           </Button>
         </div>
