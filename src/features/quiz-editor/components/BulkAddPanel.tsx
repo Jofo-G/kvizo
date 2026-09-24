@@ -16,6 +16,7 @@ const TYPE_OPTIONS: { value: QuestionType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
   { value: 'OPEN', label: 'Open Answer' },
   { value: 'FOLLOW_UP', label: 'Follow-up' },
+  { value: 'SPECIAL', label: '★ Special' },
   { value: 'PAUSE', label: '⏸ Pause' },
 ]
 
@@ -239,7 +240,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           )}
 
           {/* Default points for non-progressive, non-followup */}
-          {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && type !== 'PAUSE' && (
+          {type !== 'PROGRESSIVE_HINTS' && type !== 'FOLLOW_UP' && type !== 'PAUSE' && type !== 'SPECIAL' && (
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-[#9d8a5e] w-36">
                 Points per correct answer
@@ -257,6 +258,11 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
           {type === 'FOLLOW_UP' && (
             <p className="text-xs text-[#f0c040]/80 rounded border border-[#c8a84b]/30 bg-[#1a1200] px-3 py-2">
               ↪ Follow-up questions have no answer — host scores each player +1 / 0 / −1 during the session.
+            </p>
+          )}
+          {type === 'SPECIAL' && (
+            <p className="text-xs text-[#e07a5f]/90 rounded border border-[#e07a5f]/30 bg-[#1a0e0c] px-3 py-2">
+              ★ Special questions have no answer — host awards any custom point amount to each player during the session.
             </p>
           )}
 

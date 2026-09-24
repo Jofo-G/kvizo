@@ -88,10 +88,17 @@ export function HostLeaderboardPage() {
                   {player.display_name}
                 </span>
 
-                <span className={`shrink-0 font-bold ${
-                  i === 0 ? 'text-[#f0c040] text-2xl' : i === 1 ? 'text-[#c0c0c0]' : i === 2 ? 'text-[#cd7f32]' : 'text-[#c8a84b]'
-                }`}>
-                  {player.score}
+                <span className="shrink-0 text-right">
+                  <span className={`font-bold ${
+                    i === 0 ? 'text-[#f0c040] text-2xl' : i === 1 ? 'text-[#c0c0c0]' : i === 2 ? 'text-[#cd7f32]' : 'text-[#c8a84b]'
+                  }`}>
+                    {player.score}
+                  </span>
+                  {player.bonus_points !== 0 && (
+                    <span className={`block text-xs font-semibold ${player.bonus_points > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {player.bonus_points > 0 ? `+${player.bonus_points}` : player.bonus_points} bonus
+                    </span>
+                  )}
                 </span>
               </li>
             ))}

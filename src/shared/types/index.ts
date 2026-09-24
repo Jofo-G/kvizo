@@ -2,7 +2,7 @@
 // Domain types – mirrors the database schema
 // ============================================================
 
-export type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'PROGRESSIVE_HINTS' | 'FOLLOW_UP' | 'PAUSE'
+export type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'PROGRESSIVE_HINTS' | 'FOLLOW_UP' | 'PAUSE' | 'SPECIAL'
 export type SessionStatus = 'LOBBY' | 'RUNNING' | 'FINISHED' | 'CANCELLED'
 export type MemberRole = 'OWNER' | 'EDITOR'
 
@@ -135,6 +135,8 @@ export interface SessionPlayer {
   player_profile_id: string | null
   display_name: string
   score: number
+  /** Cumulative ad-hoc adjustments (FOLLOW_UP/SPECIAL scoring + host points panel) */
+  bonus_points: number
   joined_at: string
   avatar_url: string | null
 }

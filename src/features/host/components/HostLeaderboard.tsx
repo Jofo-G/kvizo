@@ -59,8 +59,15 @@ export function HostLeaderboard({ players }: { players: SessionPlayer[] }) {
                 {player.display_name}
               </span>
 
-              <span className={`shrink-0 text-lg font-bold ${i === 0 ? 'text-[#f0c040]' : 'text-[#c8a84b]'}`}>
-                {player.score}
+              <span className="shrink-0 text-right">
+                <span className={`text-lg font-bold ${i === 0 ? 'text-[#f0c040]' : 'text-[#c8a84b]'}`}>
+                  {player.score}
+                </span>
+                {player.bonus_points !== 0 && (
+                  <span className={`block text-[10px] font-semibold ${player.bonus_points > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {player.bonus_points > 0 ? `+${player.bonus_points}` : player.bonus_points} bonus
+                  </span>
+                )}
               </span>
             </li>
           ))}

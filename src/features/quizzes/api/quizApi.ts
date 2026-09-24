@@ -172,7 +172,7 @@ export async function bulkCreateQuestions(
         position: startPosition + i * stride,
         type,
         text: namePrefix ?? null,
-        default_points: type !== 'FOLLOW_UP' && type !== 'PAUSE' ? defaultPoints : null,
+        default_points: type !== 'FOLLOW_UP' && type !== 'PAUSE' && type !== 'SPECIAL' ? defaultPoints : null,
       })),
     )
     .select()
@@ -387,6 +387,7 @@ export async function fetchSessionPlayers(sessionId: string): Promise<SessionPla
     player_profile_id: p.player_profile_id,
     display_name: p.display_name,
     score: p.score,
+    bonus_points: p.bonus_points ?? 0,
     joined_at: p.joined_at,
     avatar_url: p.player_profiles?.avatar_url ?? null,
   })) as SessionPlayer[]

@@ -75,7 +75,14 @@ export function SessionResultsPage() {
                 <span className="text-[#9d8a5e]">
                   {i + 1}. {p.display_name}
                 </span>
-                <span className="font-bold text-[#c8a84b]">{p.score} pts</span>
+                <span className="text-right">
+                  <span className="font-bold text-[#c8a84b]">{p.score} pts</span>
+                  {p.bonus_points !== 0 && (
+                    <span className={`block text-xs font-semibold ${p.bonus_points > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {p.bonus_points > 0 ? `+${p.bonus_points}` : p.bonus_points} bonus · {p.score - p.bonus_points} from answers
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
           </ol>

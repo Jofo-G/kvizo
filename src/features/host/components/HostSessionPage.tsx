@@ -12,7 +12,7 @@ import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Trophy, Users } from 'lucide-react'
+import { Settings, Trophy, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function HostSessionPage() {
@@ -70,11 +70,52 @@ export function HostSessionPage() {
   const [followUpScores, setFollowUpScores] = useState<Record<string, number>>({})
   const [followUpLoading, setFollowUpLoading] = useState<Record<string, boolean>>({})
 
+  // special scoring: tracks committed custom point amount per player for the current question
+  const [specialScores, setSpecialScores] = useState<Record<string, number>>({})
+  const [specialInputs, setSpecialInputs] = useState<Record<string, string>>({})
+  const [specialLoading, setSpecialLoading] = useState<Record<string, boolean>>({})
+
   // reset per-question follow-up scores when moving to a new question
   useEffect(() => {
     setFollowUpScores({})
     setFollowUpLoading({})
+    setSpecialScores({})
+    setSpecialInputs({})
+    setSpecialLoading({})
   }, [session?.current_question_id])
+
+  // admin points panel — lets the host adjust any player's score at any time
+  const [showAdminPanel, setShowAdminPanel] = useState(false)
+  const [adminInputs, setAdminInputs] = useState<Record<string, string>>({})
+  const [adminLoading, setAdminLoading] = useState<Record<string, boolean>>({})
+
+  async function handleSpecialScore(sessionPlayerId: string, newValue: number) {
+    const current = specialScores[sessionPlayerId] ?? 0
+    const delta = newValue - current
+    if (delta === 0) return
+    setSpecialLoading((prev) => ({ ...prev, [sessionPlayerId]: true }))
+    try {
+      await adjustPlayerScore(sessionPlayerId, delta)
+      await refreshLeaderboard()
+      setSpecialScores((prev) => ({ ...prev, [sessionPlayerId]: newValue }))
+    } finally {
+      setSpecialLoading((prev) => ({ ...prev, [sessionPlayerId]: false }))
+    }
+  }
+
+  async function handleAdminAdjust(sessionPlayerId: string) {
+    const raw = adminInputs[sessionPlayerId]
+    const delta = Number(raw)
+    if (!raw || Number.isNaN(delta) || delta === 0) return
+    setAdminLoading((prev) => ({ ...prev, [sessionPlayerId]: true }))
+    try {
+      await adjustPlayerScore(sessionPlayerId, delta)
+      await refreshLeaderboard()
+      setAdminInputs((prev) => ({ ...prev, [sessionPlayerId]: '' }))
+    } finally {
+      setAdminLoading((prev) => ({ ...prev, [sessionPlayerId]: false }))
+    }
+  }
 
   async function handleFollowUpScore(sessionPlayerId: string, newValue: number) {
     const current = followUpScores[sessionPlayerId] ?? 0
@@ -114,6 +155,7 @@ export function HostSessionPage() {
   const isProgressiveHints = currentQuestion?.type === 'PROGRESSIVE_HINTS'
   const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
   const isPause = currentQuestion?.type === 'PAUSE'
+  const isSpecial = currentQuestion?.type === 'SPECIAL'
 
   return (
     <div
@@ -136,6 +178,13 @@ export function HostSessionPage() {
             <Users className="h-5 w-5" />
             <span className="text-lg font-semibold text-[#c8a84b]">{players.length}</span>
           </div>
+          <button
+            onClick={() => setShowAdminPanel(true)}
+            title="Adjust player points"
+            className="rounded border border-[#7a5c1c] bg-[#10131e] p-2 text-[#9d8a5e] transition-all hover:border-[#c8a84b] hover:text-[#c8a84b] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
           <a
             href={`/sessions/${sessionId}/leaderboard`}
             target="_blank"
@@ -189,7 +238,7 @@ export function HostSessionPage() {
               size="lg"
               className="w-full"
               disabled={players.length === 0 || !questions?.length}
-              onClick={() => startQuiz(questions![0].id, questions![0].type !== 'FOLLOW_UP' && questions![0].type !== 'PAUSE')}
+              onClick={() => startQuiz(questions![0].id, questions![0].type !== 'FOLLOW_UP' && questions![0].type !== 'PAUSE' && questions![0].type !== 'SPECIAL')}
             >
               START QUIZ
             </Button>
@@ -234,7 +283,7 @@ export function HostSessionPage() {
                   {isProgressiveHints && allHintsRevealed && session.accepting_answers && (
                     <p className="text-center text-sm text-[#9d8a5e]">All hints revealed</p>
                   )}
-                  {session.accepting_answers && !isFollowUp && !isPause && (
+                  {session.accepting_answers && !isFollowUp && !isPause && !isSpecial && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
                       CLOSE ANSWERS
                     </Button>
@@ -246,7 +295,7 @@ export function HostSessionPage() {
                           size="lg"
                           onClick={() => {
                             const next = questions![currentIdx + 1]
-                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE')
+                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE' && next.type !== 'SPECIAL')
                           }}
                         >
                           NEXT QUESTION ({currentIdx + 2}/{questions?.length})
@@ -266,7 +315,7 @@ export function HostSessionPage() {
                           className="w-full"
                           onClick={() => {
                             const next = questions![currentIdx + 1]
-                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE')
+                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE' && next.type !== 'SPECIAL')
                           }}
                         >
                           RESUME — NEXT QUESTION ({currentIdx + 2}/{questions?.length})
@@ -287,8 +336,8 @@ export function HostSessionPage() {
               </Card>
             )}
 
-            {/* Answer review — shown for non-follow-up, non-pause types after answers close */}
-            {!session.accepting_answers && currentQuestion && !isFollowUp && !isPause && (currentAnswers?.length ?? 0) > 0 && (
+            {/* Answer review — shown for non-follow-up, non-pause, non-special types after answers close */}
+            {!session.accepting_answers && currentQuestion && !isFollowUp && !isPause && !isSpecial && (currentAnswers?.length ?? 0) > 0 && (
               <Card>
                 <h3 className="text-lg font-semibold text-[#c8a84b] mb-3" style={{ fontFamily: 'Cinzel, serif' }}>
                   Answer Review — approve or reject each answer
@@ -395,6 +444,58 @@ export function HostSessionPage() {
                 </div>
               </Card>
             )}
+
+            {/* Special scoring panel — custom point amount per player */}
+            {isSpecial && currentQuestion && (
+              <Card>
+                <h3 className="text-lg font-semibold text-[#e07a5f] mb-1" style={{ fontFamily: 'Cinzel, serif' }}>
+                  ★ Special — award custom points
+                </h3>
+                <p className="text-xs text-[#9d8a5e] mb-4">
+                  Enter any amount (positive or negative) and apply it to each player.
+                </p>
+                <div className="flex flex-col gap-2">
+                  {players.map((p) => {
+                    const assigned = specialScores[p.id] ?? 0
+                    const busy = !!specialLoading[p.id]
+                    const inputValue = specialInputs[p.id] ?? ''
+                    return (
+                      <div key={p.id} className="flex items-center justify-between rounded border border-[#7a5c1c] bg-[#0c0f18] px-4 py-3">
+                        <div>
+                          <span className="font-semibold text-[#e8d5a0]">{p.display_name}</span>
+                          {assigned !== 0 && (
+                            <span className={`ml-2 text-xs font-bold ${assigned > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {assigned > 0 ? `+${assigned}` : assigned} applied
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2 items-center shrink-0">
+                          <input
+                            type="number"
+                            disabled={busy}
+                            value={inputValue}
+                            onChange={(e) => setSpecialInputs((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                            placeholder="0"
+                            className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#e07a5f] transition-colors text-center"
+                          />
+                          <button
+                            disabled={busy || !inputValue}
+                            onClick={() => {
+                              const val = Number(inputValue)
+                              if (Number.isNaN(val)) return
+                              handleSpecialScore(p.id, val)
+                            }}
+                            className="rounded px-3 py-1.5 text-sm font-bold bg-[#e07a5f]/90 text-[#1a0e0c] hover:bg-[#e07a5f] transition-colors disabled:opacity-50"
+                          >
+                            {busy ? '…' : 'Give'}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+            )}
           </>
         )}
 
@@ -410,7 +511,14 @@ export function HostSessionPage() {
                     <span className="text-[#9d8a5e]">
                       {i + 1}. {p.display_name}
                     </span>
-                    <span className="font-bold text-[#c8a84b]">{p.score}</span>
+                    <span className="text-right">
+                      <span className="font-bold text-[#c8a84b]">{p.score}</span>
+                      {p.bonus_points !== 0 && (
+                        <span className={`block text-xs font-semibold ${p.bonus_points > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {p.bonus_points > 0 ? `+${p.bonus_points}` : p.bonus_points} bonus · {p.score - p.bonus_points} from answers
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
             </ol>
@@ -423,6 +531,69 @@ export function HostSessionPage() {
 
       </div>
       </div>
+
+      {/* Admin points panel — adjust any player's score at any time */}
+      {showAdminPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <Card className="w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-lg font-semibold text-[#c8a84b]" style={{ fontFamily: 'Cinzel, serif' }}>
+                ⚙ Adjust Points
+              </h3>
+              <button
+                onClick={() => setShowAdminPanel(false)}
+                className="text-[#9d8a5e] hover:text-[#c8a84b] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-[#9d8a5e] mb-4">
+              Give or take any amount of points from a player, at any point in the session.
+            </p>
+            <div className="flex flex-col gap-2">
+              {players.map((p) => {
+                const busy = !!adminLoading[p.id]
+                const inputValue = adminInputs[p.id] ?? ''
+                return (
+                  <div key={p.id} className="flex items-center justify-between rounded border border-[#7a5c1c] bg-[#0c0f18] px-4 py-3">
+                    <div>
+                      <span className="font-semibold text-[#e8d5a0]">{p.display_name}</span>
+                      <p className="text-xs text-[#6b5e42] mt-0.5">
+                        Score: {p.score}
+                        {p.bonus_points !== 0 && (
+                          <span className={p.bonus_points > 0 ? 'text-green-500' : 'text-red-500'}>
+                            {' '}({p.bonus_points > 0 ? `+${p.bonus_points}` : p.bonus_points} bonus)
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 items-center shrink-0">
+                      <input
+                        type="number"
+                        disabled={busy}
+                        value={inputValue}
+                        onChange={(e) => setAdminInputs((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                        placeholder="0"
+                        className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
+                      />
+                      <button
+                        disabled={busy || !inputValue}
+                        onClick={() => handleAdminAdjust(p.id)}
+                        className="rounded px-3 py-1.5 text-sm font-bold bg-[#c8a84b] text-[#1a0e00] hover:bg-[#f0c040] transition-colors disabled:opacity-50"
+                      >
+                        {busy ? '…' : 'Apply'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+              {players.length === 0 && (
+                <p className="text-sm text-center text-[#9d8a5e] py-4">No players yet</p>
+              )}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

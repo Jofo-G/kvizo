@@ -25,6 +25,8 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
   { value: 'OPEN', label: 'Open Answer' },
   { value: 'PROGRESSIVE_HINTS', label: 'Progressive Hints' },
+  { value: 'FOLLOW_UP', label: '↪ Follow-up' },
+  { value: 'SPECIAL', label: '★ Special' },
   { value: 'PAUSE', label: '⏸ Pause' },
 ]
 
@@ -321,7 +323,7 @@ function parseQuizExport(value: unknown) {
 }
 
 function parseQuestion(value: unknown, index: number): QuizExportQuestion {
-  if (!isRecord(value) || !['MULTIPLE_CHOICE', 'OPEN', 'PROGRESSIVE_HINTS', 'FOLLOW_UP', 'PAUSE'].includes(String(value.type))) {
+  if (!isRecord(value) || !['MULTIPLE_CHOICE', 'OPEN', 'PROGRESSIVE_HINTS', 'FOLLOW_UP', 'PAUSE', 'SPECIAL'].includes(String(value.type))) {
     throw new Error(`Question ${index + 1} has an invalid type.`)
   }
   if ((value.text !== null && typeof value.text !== 'string') || (value.default_points !== null && !isPositiveInteger(value.default_points))) {

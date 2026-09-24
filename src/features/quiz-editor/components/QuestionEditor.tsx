@@ -69,7 +69,7 @@ export function QuestionEditor({
     try {
       await updateQuestion(question.id, {
         text: text || null,
-        default_points: question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' ? defaultPoints : null,
+        default_points: question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' ? defaultPoints : null,
       })
       if (question.type === 'MULTIPLE_CHOICE') {
         await upsertOptions(question.id, options)
@@ -110,9 +110,11 @@ export function QuestionEditor({
             ? 'text-[#f0c040]'
             : question.type === 'PAUSE'
             ? 'text-[#9d8a5e]'
+            : question.type === 'SPECIAL'
+            ? 'text-[#e07a5f]'
             : 'text-[#c8a84b]'
         }`}>
-          {question.type === 'FOLLOW_UP' ? '↪ FOLLOW-UP' : question.type === 'PAUSE' ? '⏸ PAUSE' : question.type.replace('_', ' ')} — Q{question.position}
+          {question.type === 'FOLLOW_UP' ? '↪ FOLLOW-UP' : question.type === 'PAUSE' ? '⏸ PAUSE' : question.type === 'SPECIAL' ? '★ SPECIAL' : question.type.replace('_', ' ')} — Q{question.position}
           {question.text ? ` · ${question.text}` : ''}
         </span>
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -297,6 +299,11 @@ export function QuestionEditor({
           {question.type === 'PAUSE' && (
             <p className="text-xs text-[#9d8a5e] rounded border border-[#7a5c1c] bg-[#0c0f18] px-3 py-2">
               ⏸ Pause — players see a break screen with no answer input. The label above is shown as the break title. Host clicks Next Question to continue.
+            </p>
+          )}
+          {question.type === 'SPECIAL' && (
+            <p className="text-xs text-[#e07a5f]/90 rounded border border-[#e07a5f]/30 bg-[#1a0e0c] px-3 py-2">
+              ★ Special — no answer needed. During the session the host gives each player any custom amount of points (positive or negative).
             </p>
           )}
 

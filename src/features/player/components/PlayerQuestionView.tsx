@@ -204,6 +204,23 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
             </Card>
           )}
 
+          {/* Special question */}
+          {question.type === 'SPECIAL' && (
+            <Card className="text-center border-[#e07a5f]/60 bg-[#1a0e0c]">
+              <p className="text-base font-bold text-[#e07a5f] mb-1" style={{ fontFamily: 'Cinzel, serif' }}>
+                ★ Special Round
+              </p>
+              <p className="text-sm text-[#9d8a5e]">
+                No answer needed — the host will award points directly.
+              </p>
+              {myPlayer.score !== undefined && (
+                <p className="text-xs text-[#6b5e42] mt-3">
+                  Current score: {myPlayer.score}
+                </p>
+              )}
+            </Card>
+          )}
+
           {/* Progressive hint — side-accented strip, not a card */}
           {question.type === 'PROGRESSIVE_HINTS' && (
             currentHint ? (
@@ -226,7 +243,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Closed notice */}
-          {isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
+          {isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' && (
             <Card className={`text-center border ${
               reviewResult?.is_correct === true
                 ? 'bg-green-950/40 border-green-700/60'
@@ -250,7 +267,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Submitted confirmation while still open */}
-          {submitted && !isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
+          {submitted && !isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' && (
             <Card className="text-center bg-[#0c0f18] border-[#7a5c1c]">
               <p className="text-[#c8a84b] font-semibold">
                 ✔ Answer submitted
@@ -264,7 +281,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           )}
 
           {/* Answer controls */}
-          {!isClosed && !submitted && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && (
+          {!isClosed && !submitted && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {question.type === 'MULTIPLE_CHOICE' && (
                 <div className="flex flex-col gap-2">
