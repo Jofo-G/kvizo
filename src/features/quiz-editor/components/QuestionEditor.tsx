@@ -39,6 +39,7 @@ export function QuestionEditor({
   const [collapsed, setCollapsed] = useState(true)
   const [text, setText] = useState(question.text ?? '')
   const [defaultPoints, setDefaultPoints] = useState(question.default_points ?? 1)
+  const [negativePoints, setNegativePoints] = useState(question.negative_points ?? 0)
   const [saving, setSaving] = useState(false)
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
@@ -72,6 +73,7 @@ export function QuestionEditor({
       await updateQuestion(question.id, {
         text: text || null,
         default_points: question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' ? defaultPoints : null,
+        negative_points: question.type === 'MULTIPLE_CHOICE' || question.type === 'OPEN' ? negativePoints : 0,
       })
       if (question.type === 'MULTIPLE_CHOICE') {
         await upsertOptions(question.id, options)
@@ -163,16 +165,28 @@ export function QuestionEditor({
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#9d8a5e]">Options</span>
-                <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
-                  Points for correct answer
-                  <input
-                    type="number"
-                    min={1}
-                    value={defaultPoints}
-                    onChange={(e) => setDefaultPoints(Number(e.target.value))}
-                    className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
-                  />
-                </label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
+                    Points for correct answer
+                    <input
+                      type="number"
+                      min={1}
+                      value={defaultPoints}
+                      onChange={(e) => setDefaultPoints(Number(e.target.value))}
+                      className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
+                    />
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
+                    Points lost for wrong answer
+                    <input
+                      type="number"
+                      min={0}
+                      value={negativePoints}
+                      onChange={(e) => setNegativePoints(Number(e.target.value))}
+                      className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
+                    />
+                  </label>
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 {options.map((opt, i) => (
@@ -221,16 +235,28 @@ export function QuestionEditor({
                   Accepted answers <span className="normal-case font-normal">(one per line, case-insensitive)</span>
                 </span>
                 {question.type === 'OPEN' && (
-                  <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
-                    Points
-                    <input
-                      type="number"
-                      min={1}
-                      value={defaultPoints}
-                      onChange={(e) => setDefaultPoints(Number(e.target.value))}
-                      className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
-                    />
-                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
+                      Points
+                      <input
+                        type="number"
+                        min={1}
+                        value={defaultPoints}
+                        onChange={(e) => setDefaultPoints(Number(e.target.value))}
+                        className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-[#9d8a5e]">
+                      Points lost if wrong
+                      <input
+                        type="number"
+                        min={0}
+                        value={negativePoints}
+                        onChange={(e) => setNegativePoints(Number(e.target.value))}
+                        className="w-16 rounded border border-[#7a5c1c] bg-[#080a10] px-2 py-1 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors text-center"
+                      />
+                    </label>
+                  </div>
                 )}
               </div>
               <textarea

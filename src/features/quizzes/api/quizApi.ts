@@ -116,6 +116,7 @@ export async function exportQuiz(quiz: Quiz, questions: Question[]): Promise<Qui
         type: question.type,
         text: question.text,
         default_points: question.default_points,
+        negative_points: question.negative_points,
         options: options.map(({ position, text, is_correct }) => ({ position, text, is_correct })),
         accepted_answers: acceptedAnswers.map(({ answer }) => answer),
         hints: hints.map(({ position, text, points }) => ({ position, text, points })),
@@ -160,6 +161,7 @@ export async function bulkCreateQuestions(
   namePrefix?: string,        // optional label applied to every main question
   withFollowUp?: boolean,     // interleave a FOLLOW_UP after each question
   followUpNamePrefix?: string, // optional label for follow-up questions
+  negativePoints?: number,    // for MULTIPLE_CHOICE / OPEN: points deducted on a wrong answer
 ): Promise<void> {
   // Each slot is 1 position wide normally, 2 wide when follow-ups are interleaved
   const stride = withFollowUp ? 2 : 1
@@ -173,6 +175,7 @@ export async function bulkCreateQuestions(
         type,
         text: namePrefix ?? null,
         default_points: type !== 'FOLLOW_UP' && type !== 'PAUSE' && type !== 'SPECIAL' ? defaultPoints : null,
+        negative_points: type === 'MULTIPLE_CHOICE' || type === 'OPEN' ? (negativePoints ?? 0) : 0,
       })),
     )
     .select()

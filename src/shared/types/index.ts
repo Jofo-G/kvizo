@@ -42,6 +42,8 @@ export interface Question {
   type: QuestionType
   text: string | null
   default_points: number | null
+  /** Points deducted for a wrong answer (MULTIPLE_CHOICE / OPEN only) */
+  negative_points: number
   created_at: string
   updated_at: string
 }
@@ -91,6 +93,7 @@ export interface QuizExportQuestion {
   type: QuestionType
   text: string | null
   default_points: number | null
+  negative_points: number
   options: Array<Pick<QuestionOption, 'position' | 'text' | 'is_correct'>>
   accepted_answers: string[]
   hints: Array<Pick<QuestionHint, 'position' | 'text' | 'points'>>

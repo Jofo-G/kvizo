@@ -29,6 +29,7 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
   const [withFollowUp, setWithFollowUp] = useState(false)
   const [followUpNamePrefix, setFollowUpNamePrefix] = useState('')
   const [defaultPoints, setDefaultPoints] = useState(1)
+  const [negativePoints, setNegativePoints] = useState(0)
   const [optionCount, setOptionCount] = useState(4)
   const [hintPoints, setHintPoints] = useState<number[]>([5, 3, 1])
   const [loading, setLoading] = useState(false)
@@ -252,6 +253,23 @@ export function BulkAddPanel({ quizId, nextPosition }: Props) {
                 onChange={(e) => setDefaultPoints(Number(e.target.value))}
                 className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
               />
+            </div>
+          )}
+
+          {/* Negative points for wrong answers — MULTIPLE_CHOICE / OPEN only */}
+          {(type === 'MULTIPLE_CHOICE' || type === 'OPEN') && (
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-[#9d8a5e] w-36">
+                Points lost if wrong
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={negativePoints}
+                onChange={(e) => setNegativePoints(Number(e.target.value))}
+                className="w-20 rounded border border-[#7a5c1c] bg-[#080a10] px-3 py-1.5 text-sm text-[#e8d5a0] outline-none focus:border-[#c8a84b] transition-colors"
+              />
+              <span className="text-xs text-[#6b5e42]">0 = no penalty</span>
             </div>
           )}
 
