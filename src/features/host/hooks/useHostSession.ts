@@ -93,6 +93,16 @@ export function useHostSession(sessionId: string) {
     await reload()
   }
 
+  async function reopenAnswers() {
+    if (!session) return
+    await updateSession(sessionId, { accepting_answers: true })
+    await broadcastEvent(sessionId, {
+      type: 'ANSWERS_REOPENED',
+      questionId: session.current_question_id,
+    })
+    await reload()
+  }
+
   async function finishSession() {
     await updateSession(sessionId, {
       status: 'FINISHED',
@@ -117,6 +127,7 @@ export function useHostSession(sessionId: string) {
     startQuestion,
     revealNextHint,
     closeAnswers,
+    reopenAnswers,
     finishSession,
     refreshLeaderboard,
   }

@@ -28,6 +28,7 @@ export function HostSessionPage() {
     startQuestion,
     revealNextHint,
     closeAnswers,
+    reopenAnswers,
     finishSession,
     refreshLeaderboard,
   } = useHostSession(sessionId!)
@@ -301,6 +302,11 @@ export function HostSessionPage() {
                   {session.accepting_answers && !isFollowUp && !isPause && !isSpecial && (
                     <Button variant="secondary" size="lg" onClick={closeAnswers}>
                       CLOSE ANSWERS
+                    </Button>
+                  )}
+                  {!session.accepting_answers && !isFollowUp && !isPause && !isSpecial && (
+                    <Button variant="secondary" size="lg" onClick={reopenAnswers}>
+                      GO BACK — REOPEN ANSWERS
                     </Button>
                   )}
                   {!session.accepting_answers && !isPause && (
