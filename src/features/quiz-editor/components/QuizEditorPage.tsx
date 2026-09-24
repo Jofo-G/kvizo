@@ -4,12 +4,12 @@ import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { Question, QuestionType, QuizExportQuestion } from '@/shared/types'
 import {
-    createQuestion,
-    deleteQuestion,
+  createQuestion,
+  deleteQuestion,
   exportQuiz,
-    fetchQuestions,
+  fetchQuestions,
   replaceQuizFromExport,
-    updateQuestion,
+  updateQuestion,
 } from '../../quizzes/api/quizApi'
 import { useQuiz, useUpdateQuiz } from '../../quizzes/hooks/useQuizzes'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
