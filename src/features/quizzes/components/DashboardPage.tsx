@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthProvider'
 import { useCreateQuiz, useDeleteQuiz, useMyQuizzes } from '../hooks/useQuizzes'
 import { formatDate } from '@/shared/lib/utils'
+import { LogOut, Users } from 'lucide-react'
 
 export function DashboardPage() {
   const { user, isAdmin, signOut } = useAuth()
@@ -46,13 +47,22 @@ export function DashboardPage() {
             {isAdmin && (
               <Link
                 to="/admin/users"
-                className="text-sm text-[#c8a84b] hover:text-[#f0c040] transition-colors"
+                aria-label="Manage players"
+                title="Manage players"
+                className="inline-flex h-9 w-9 items-center justify-center rounded border border-transparent text-[#c8a84b] transition-colors hover:border-[#c8a84b]/30 hover:bg-[#c8a84b]/10 hover:text-[#f0c040]"
               >
-                Manage Players
+                <Users className="h-5 w-5" />
               </Link>
             )}
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              Sign Out
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="Sign out"
+              title="Sign out"
+              className="h-9 w-9 p-0"
+              onClick={signOut}
+            >
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
