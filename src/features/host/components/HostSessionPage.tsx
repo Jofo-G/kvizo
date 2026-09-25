@@ -427,7 +427,7 @@ export function HostSessionPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex gap-2 items-center shrink-0 ml-4">
+                        <div className="flex flex-col gap-2 items-center shrink-0 ml-4">
                           <button
                             onClick={() => handleOverride(a, true)}
                             disabled={!!overrideLoading[a.id]}
