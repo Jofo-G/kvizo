@@ -31,6 +31,7 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
     setSubmitted(false)
     setHasEverSubmitted(false)
     setSubmitError('')
+    setRestoredForQuestion(null)
   }, [session.current_question_id])
 
   // Allow re-answer when a new hint is revealed; keep hasEverSubmitted
@@ -84,8 +85,17 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
 
   const isClosed = !session.accepting_answers
 
-  // Poll own answer result after host closes and reviews
-  const { data: reviewResult } = useQuery<{ is_correct: boolean | null; points_awarded: number } | null>({
+  type MyAnswer = {
+    answer_text: string | null
+    selected_option_id: string | null
+    is_correct: boolean | null
+    points_awarded: number
+  }
+
+  // Fetch own answer for the current question — used both to restore
+  // submitted state after a refresh and to poll the review result once
+  // the host closes the question.
+  const { data: myAnswer } = useQuery<MyAnswer | null>({
     queryKey: ['my_answer', session.current_question_id, isClosed],
     queryFn: async () => {
       const playerId = localStorage.getItem(PLAYER_SESSION_KEY)
@@ -98,11 +108,24 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
       })
       return data ?? null
     },
-    enabled: isClosed && !!session.current_question_id,
+    enabled: !!session.current_question_id,
     refetchInterval: isClosed ? 2000 : false,
     refetchOnMount: true,
     staleTime: 0,
   })
+
+  // Restore a previously-submitted answer once per question (e.g. after a
+  // page refresh) without clobbering in-progress edits from later polls.
+  const [restoredForQuestion, setRestoredForQuestion] = useState<string | null>(null)
+  useEffect(() => {
+    if (!myAnswer || !session.current_question_id) return
+    if (restoredForQuestion === session.current_question_id) return
+    setSelectedOptionId(myAnswer.selected_option_id ?? null)
+    setOpenText(myAnswer.answer_text ?? '')
+    setSubmitted(true)
+    setHasEverSubmitted(true)
+    setRestoredForQuestion(session.current_question_id)
+  }, [myAnswer, session.current_question_id, restoredForQuestion])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -245,14 +268,14 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
           {/* Closed notice */}
           {isClosed && question.type !== 'FOLLOW_UP' && question.type !== 'PAUSE' && question.type !== 'SPECIAL' && (
             <Card className={`text-center border ${
-              reviewResult?.is_correct === true
+              myAnswer?.is_correct === true
                 ? 'bg-green-950/40 border-green-700/60'
                 : 'bg-[#1a0e00] border-[#c8a84b]/40'
             }`}>
-              {reviewResult?.is_correct === true ? (
+              {myAnswer?.is_correct === true ? (
                 <>
                   <p className="text-xl font-bold text-green-400" style={{ fontFamily: 'Cinzel, serif' }}>
-                    ✔ Correct! +{reviewResult.points_awarded} points
+                    ✔ Correct! +{myAnswer.points_awarded} points
                   </p>
                   <p className="text-sm text-green-600 mt-1">
                     Total: {myPlayer.score}
