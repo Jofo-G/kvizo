@@ -348,7 +348,7 @@ export function HostSessionPage() {
                           aria-label="Go back — reopen answers"
                           title="Go back — reopen answers"
                         >
-                          Open ans.
+                          Open answers
                         </Button>
                       )}
                       {hasNextQuestion && (
@@ -359,7 +359,7 @@ export function HostSessionPage() {
                           aria-label={`Next question (${currentIdx + 2}/${questions?.length})`}
                           title={`Next question (${currentIdx + 2}/${questions?.length})`}
                         >
-                          Next Q.
+                          Next
                         </Button>
                       )}
                     </div>
