@@ -14,7 +14,7 @@ import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Settings, Trophy, Users, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Settings, Trophy, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../auth/AuthProvider'
 
@@ -318,8 +318,14 @@ export function HostSessionPage() {
                     </Button>
                   )}
                   {!session.accepting_answers && !isFollowUp && !isPause && !isSpecial && (
-                    <Button variant="secondary" size="lg" onClick={reopenAnswers}>
-                      GO BACK — REOPEN ANSWERS
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      onClick={reopenAnswers}
+                      aria-label="Go back — reopen answers"
+                      title="Go back — reopen answers"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
                     </Button>
                   )}
                   {!session.accepting_answers && !isPause && (
@@ -331,8 +337,10 @@ export function HostSessionPage() {
                             const next = questions![currentIdx + 1]
                             startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE' && next.type !== 'SPECIAL')
                           }}
+                          aria-label={`Next question (${currentIdx + 2}/${questions?.length})`}
+                          title={`Next question (${currentIdx + 2}/${questions?.length})`}
                         >
-                          NEXT QUESTION ({currentIdx + 2}/{questions?.length})
+                          <ArrowRight className="h-5 w-5" />
                         </Button>
                       )}
                     </>
