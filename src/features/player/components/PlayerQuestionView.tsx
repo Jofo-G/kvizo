@@ -277,6 +277,18 @@ export function PlayerQuestionView({ session, myPlayer, submitAnswer, questionNu
                   ? 'You can update your answer when the next hint is revealed'
                   : 'You can update your answer until the host closes the question'}
               </p>
+              {question.type !== 'PROGRESSIVE_HINTS' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitted(false)
+                    setSubmitError('')
+                  }}
+                  className="mt-3 text-sm font-semibold text-[#f0c040] underline hover:text-[#c8a84b] transition-colors"
+                >
+                  Edit answer
+                </button>
+              )}
             </Card>
           )}
 
