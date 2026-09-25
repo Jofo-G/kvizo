@@ -77,6 +77,8 @@ export function HostSessionPage() {
 
   const [overrideLoading, setOverrideLoading] = useState<Record<string, 'approve' | 'reject' | null>>({})
   const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, boolean>>({})
+  // Whether the host has approved/rejected at least one answer for the current question
+  const [reviewedThisQuestion, setReviewedThisQuestion] = useState(false)
 
   // follow-up scoring: tracks committed delta per player (-1 / 0 / +1)
   const [followUpScores, setFollowUpScores] = useState<Record<string, number>>({})
@@ -94,11 +96,13 @@ export function HostSessionPage() {
     setSpecialScores({})
     setSpecialInputs({})
     setSpecialLoading({})
+    setReviewedThisQuestion(false)
   }, [session?.current_question_id])
 
   // admin points panel — lets the host adjust any player's score at any time
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [showFinishConfirmation, setShowFinishConfirmation] = useState(false)
+  const [showNextConfirmation, setShowNextConfirmation] = useState(false)
   const [adminInputs, setAdminInputs] = useState<Record<string, string>>({})
   const [adminLoading, setAdminLoading] = useState<Record<string, boolean>>({})
 
@@ -146,6 +150,7 @@ export function HostSessionPage() {
   async function handleOverride(answer: Answer, correct: boolean) {
     setOptimisticOverrides((prev) => ({ ...prev, [answer.id]: correct }))
     setOverrideLoading((prev) => ({ ...prev, [answer.id]: correct ? 'approve' : 'reject' }))
+    setReviewedThisQuestion(true)
     try {
       await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
       // Wait for the answers query to catch up before dropping the optimistic
@@ -174,6 +179,21 @@ export function HostSessionPage() {
   const isFollowUp = currentQuestion?.type === 'FOLLOW_UP'
   const isPause = currentQuestion?.type === 'PAUSE'
   const isSpecial = currentQuestion?.type === 'SPECIAL'
+
+  function goToNextQuestion() {
+    const next = questions![currentIdx + 1]
+    startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE' && next.type !== 'SPECIAL')
+  }
+
+  function handleNextQuestionClick() {
+    const hasUnreviewedAnswers =
+      !isFollowUp && !isPause && !isSpecial && (currentAnswers?.length ?? 0) > 0 && !reviewedThisQuestion
+    if (hasUnreviewedAnswers) {
+      setShowNextConfirmation(true)
+    } else {
+      goToNextQuestion()
+    }
+  }
 
   return (
     <div
@@ -317,33 +337,32 @@ export function HostSessionPage() {
                       CLOSE ANSWERS
                     </Button>
                   )}
-                  {!session.accepting_answers && !isFollowUp && !isPause && !isSpecial && (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      onClick={reopenAnswers}
-                      aria-label="Go back — reopen answers"
-                      title="Go back — reopen answers"
-                    >
-                      <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                  )}
                   {!session.accepting_answers && !isPause && (
-                    <>
+                    <div className="flex flex-row gap-3">
+                      {!isFollowUp && !isSpecial && (
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          className="flex-1"
+                          onClick={reopenAnswers}
+                          aria-label="Go back — reopen answers"
+                          title="Go back — reopen answers"
+                        >
+                          <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                      )}
                       {hasNextQuestion && (
                         <Button
                           size="lg"
-                          onClick={() => {
-                            const next = questions![currentIdx + 1]
-                            startQuestion(next.id, next.type !== 'FOLLOW_UP' && next.type !== 'PAUSE' && next.type !== 'SPECIAL')
-                          }}
+                          className="flex-1"
+                          onClick={handleNextQuestionClick}
                           aria-label={`Next question (${currentIdx + 2}/${questions?.length})`}
                           title={`Next question (${currentIdx + 2}/${questions?.length})`}
                         >
                           <ArrowRight className="h-5 w-5" />
                         </Button>
                       )}
-                    </>
+                    </div>
                   )}
                   {isPause && (
                     <>
@@ -639,6 +658,17 @@ export function HostSessionPage() {
           setShowFinishConfirmation(false)
         }}
         onCancel={() => setShowFinishConfirmation(false)}
+      />
+      <ConfirmDialog
+        open={showNextConfirmation}
+        title="Skip answer review?"
+        message="You haven't approved or rejected any answers for this question yet. Continue to the next question anyway?"
+        confirmLabel="Next question"
+        onConfirm={() => {
+          setShowNextConfirmation(false)
+          goToNextQuestion()
+        }}
+        onCancel={() => setShowNextConfirmation(false)}
       />
     </div>
   )
