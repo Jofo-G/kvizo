@@ -54,6 +54,7 @@ export function useHostSession(sessionId: string) {
       started_at: new Date().toISOString(),
       current_question_id: firstQuestionId,
       current_hint_index: 0,
+      current_question_started_at: new Date().toISOString(),
       accepting_answers: acceptAnswers,
     })
     await broadcastEvent(sessionId, { type: 'SESSION_STARTED' })
@@ -65,6 +66,7 @@ export function useHostSession(sessionId: string) {
     await updateSession(sessionId, {
       current_question_id: questionId,
       current_hint_index: 0,
+      current_question_started_at: new Date().toISOString(),
       accepting_answers: acceptAnswers,
     })
     await broadcastEvent(sessionId, { type: 'QUESTION_STARTED', questionId })

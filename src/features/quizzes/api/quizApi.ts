@@ -344,7 +344,7 @@ export async function createSession(quizId: string, joinCode: string): Promise<Q
 
 export async function updateSession(
   sessionId: string,
-  updates: Partial<Pick<QuizSession, 'status' | 'current_question_id' | 'current_hint_index' | 'accepting_answers' | 'started_at' | 'finished_at'>>,
+  updates: Partial<Pick<QuizSession, 'status' | 'current_question_id' | 'current_hint_index' | 'current_question_started_at' | 'accepting_answers' | 'started_at' | 'finished_at'>>,
 ): Promise<void> {
   const { error } = await supabase
     .from('quiz_sessions')

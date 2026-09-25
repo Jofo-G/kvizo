@@ -107,6 +107,8 @@ export interface QuizSession {
   status: SessionStatus
   current_question_id: string | null
   current_hint_index: number | null
+  /** When the current question started accepting answers (used to measure answer speed) */
+  current_question_started_at: string | null
   accepting_answers: boolean
   started_at: string | null
   finished_at: string | null
@@ -154,6 +156,8 @@ export interface Answer {
   hint_index_at_submission: number | null
   is_correct: boolean | null
   points_awarded: number
+  /** When the question started accepting answers, captured at first submission */
+  question_started_at: string | null
   submitted_at: string
   updated_at: string
 }
