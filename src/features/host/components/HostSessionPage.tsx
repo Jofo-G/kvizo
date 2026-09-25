@@ -12,7 +12,7 @@ import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'
 import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Settings, Trophy, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -22,6 +22,7 @@ export function HostSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
+  const queryClient = useQueryClient()
   const {
     session,
     players,
@@ -147,7 +148,12 @@ export function HostSessionPage() {
     setOverrideLoading((prev) => ({ ...prev, [answer.id]: correct ? 'approve' : 'reject' }))
     try {
       await supabase.rpc('override_answer', { p_answer_id: answer.id, p_is_correct: correct })
-      await refreshLeaderboard()
+      // Wait for the answers query to catch up before dropping the optimistic
+      // value, otherwise it briefly flashes back to the stale cached result.
+      await Promise.all([
+        refreshLeaderboard(),
+        queryClient.invalidateQueries({ queryKey: ['answers', sessionId, session?.current_question_id] }),
+      ])
       setOptimisticOverrides((prev) => { const n = { ...prev }; delete n[answer.id]; return n })
     } catch {
       setOptimisticOverrides((prev) => { const n = { ...prev }; delete n[answer.id]; return n })
