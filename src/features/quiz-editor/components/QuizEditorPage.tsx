@@ -5,16 +5,16 @@ import { Input } from '@/shared/components/Input'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import type { Question, QuestionType, QuizExportQuestion } from '@/shared/types'
 import {
-  createQuestion,
-  deleteQuestion,
-  exportQuiz,
-  fetchQuestions,
-  replaceQuizFromExport,
-  updateQuestion,
+    createQuestion,
+    deleteQuestion,
+    exportQuiz,
+    fetchQuestions,
+    replaceQuizFromExport,
+    updateQuestion,
 } from '../../quizzes/api/quizApi'
 import { useQuiz, useUpdateQuiz } from '../../quizzes/hooks/useQuizzes'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Download, Upload } from 'lucide-react'
+import { ChevronLeft, Download, Plus, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { BulkAddPanel } from './BulkAddPanel'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -56,6 +56,7 @@ export function QuizEditorPage() {
   const [transferError, setTransferError] = useState<string | null>(null)
   const [transferring, setTransferring] = useState(false)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null)
+  const [insertAt, setInsertAt] = useState<number | null>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
 
   // Init local state from loaded quiz
@@ -71,6 +72,16 @@ export function QuizEditorPage() {
   async function handleAddQuestion(type: QuestionType) {
     const pos = (questions?.length ?? 0) + 1
     await createQuestion(quizId!, pos, type)
+    qc.invalidateQueries({ queryKey: ['questions', quizId] })
+  }
+
+  // Inserts a new question directly at the desired spot instead of appending it at
+  // the end and forcing the user to move it up one click at a time.
+  async function handleInsertQuestion(type: QuestionType, atIndex: number) {
+    const list = questions ?? []
+    await Promise.all(list.slice(atIndex).map((q) => updateQuestion(q.id, { position: q.position + 1 })))
+    await createQuestion(quizId!, atIndex + 1, type)
+    setInsertAt(null)
     qc.invalidateQueries({ queryKey: ['questions', quizId] })
   }
 
@@ -282,27 +293,40 @@ export function QuizEditorPage() {
             </div>
           )}
 
+          <InsertDivider
+            isOpen={insertAt === 0}
+            onToggle={() => setInsertAt((cur) => (cur === 0 ? null : 0))}
+            onInsert={(type) => handleInsertQuestion(type, 0)}
+          />
+
           {questions?.map((q, i) => (
-            <div key={q.id} className="flex items-start gap-2">
-              {selectMode && (
-                <input
-                  type="checkbox"
-                  checked={selectedIds.has(q.id)}
-                  onChange={() => toggleSelect(q.id)}
-                  className="mt-4 h-4 w-4 shrink-0 accent-[#c8a84b]"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <QuestionEditor
-                  question={q}
-                  quizId={quizId!}
-                  onDelete={() => handleDeleteQuestion(q)}
-                  onMoveUp={() => swapPositions(q, questions[i - 1])}
-                  onMoveDown={() => swapPositions(q, questions[i + 1])}
-                  isFirst={i === 0}
-                  isLast={i === (questions?.length ?? 1) - 1}
-                />
+            <div key={q.id} className="contents">
+              <div className="flex items-start gap-2">
+                {selectMode && (
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(q.id)}
+                    onChange={() => toggleSelect(q.id)}
+                    className="mt-4 h-4 w-4 shrink-0 accent-[#c8a84b]"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <QuestionEditor
+                    question={q}
+                    quizId={quizId!}
+                    onDelete={() => handleDeleteQuestion(q)}
+                    onMoveUp={() => swapPositions(q, questions[i - 1])}
+                    onMoveDown={() => swapPositions(q, questions[i + 1])}
+                    isFirst={i === 0}
+                    isLast={i === (questions?.length ?? 1) - 1}
+                  />
+                </div>
               </div>
+              <InsertDivider
+                isOpen={insertAt === i + 1}
+                onToggle={() => setInsertAt((cur) => (cur === i + 1 ? null : i + 1))}
+                onInsert={(type) => handleInsertQuestion(type, i + 1)}
+              />
             </div>
           ))}
         </div>
@@ -341,6 +365,58 @@ export function QuizEditorPage() {
         }}
         onCancel={() => setConfirmation(null)}
       />
+    </div>
+  )
+}
+
+interface InsertDividerProps {
+  isOpen: boolean
+  onToggle: () => void
+  onInsert: (type: QuestionType) => void
+}
+
+// Hover/tap control between questions so a new one can be dropped exactly where it's
+// needed, instead of always landing at the bottom and needing repeated "move up" clicks.
+function InsertDivider({ isOpen, onToggle, onInsert }: InsertDividerProps) {
+  return (
+    <div className="relative flex items-center gap-2 py-1">
+      <div className="h-px flex-1 bg-[#2a2f3d]" />
+      <button
+        type="button"
+        onClick={onToggle}
+        title="Insert question here"
+        aria-label="Insert question here"
+        className={`z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all ${
+          isOpen
+            ? 'border-[#c8a84b] bg-[#c8a84b] text-[#1a0e00]'
+            : 'border-[#7a5c1c] bg-[#10131e] text-[#9d8a5e] hover:border-[#c8a84b] hover:text-[#c8a84b]'
+        }`}
+      >
+        <Plus className="h-3 w-3" />
+      </button>
+      <div className="h-px flex-1 bg-[#2a2f3d]" />
+
+      {isOpen && (
+        <div className="absolute left-1/2 top-full z-20 mt-1 flex w-max max-w-[92vw] -translate-x-1/2 flex-wrap justify-center gap-1.5 rounded border border-[#7a5c1c] bg-[#10131e] p-2 shadow-lg">
+          {QUESTION_TYPES.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => onInsert(t.value)}
+              className="rounded border border-[#7a5c1c] bg-[#1a1f2e] px-2 py-1 text-xs font-semibold text-[#9d8a5e] transition-colors hover:border-[#c8a84b] hover:text-[#c8a84b]"
+            >
+              + {t.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onToggle}
+            className="rounded px-2 py-1 text-xs text-[#9d8a5e] hover:text-[#c8a84b]"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </div>
   )
 }
