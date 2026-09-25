@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
     adjustPlayerScore,
     fetchAnswersForQuestion,
+    fetchOptions,
     fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
@@ -61,6 +62,12 @@ export function HostSessionPage() {
       return data ?? []
     },
     enabled: currentQuestion?.type === 'PROGRESSIVE_HINTS' && !!session?.current_question_id,
+  })
+
+  const { data: currentOptions } = useQuery({
+    queryKey: ['options', session?.current_question_id],
+    queryFn: () => fetchOptions(session!.current_question_id!),
+    enabled: currentQuestion?.type === 'MULTIPLE_CHOICE' && !!session?.current_question_id,
   })
 
   const allHintsRevealed =
@@ -360,6 +367,8 @@ export function HostSessionPage() {
                     .map((a, rank) => {
                     const player = players.find((p) => p.id === a.session_player_id)
                     const effective = a.id in optimisticOverrides ? optimisticOverrides[a.id] : a.is_correct
+                    const optionIndex = currentOptions?.findIndex((o) => o.id === a.selected_option_id) ?? -1
+                    const selectedOption = optionIndex >= 0 ? currentOptions![optionIndex] : undefined
                     return (
                       <div
                         key={a.id}
@@ -376,7 +385,7 @@ export function HostSessionPage() {
                           <div>
                             <span className="font-semibold text-[#e8d5a0]">{player?.display_name}</span>
                             <p className="text-sm text-[#9d8a5e] mt-0.5">
-                              {a.answer_text || (a.selected_option_id ? `Option selected` : '—')}
+                              {a.answer_text || (selectedOption ? `${String.fromCharCode(65 + optionIndex)}. ${selectedOption.text}` : a.selected_option_id ? 'Option selected' : '—')}
                             </p>
                             {a.hint_index_at_submission != null && (
                               <p className="text-xs text-[#6b5e42] mt-0.5">
