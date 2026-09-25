@@ -3,10 +3,10 @@ import { Card } from '@/shared/components/Card'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import {
-    adjustPlayerScore,
-    fetchAnswersForQuestion,
-    fetchOptions,
-    fetchQuestions,
+  adjustPlayerScore,
+  fetchAnswersForQuestion,
+  fetchOptions,
+  fetchQuestions,
 } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
 import { supabase } from '@/supabase/client'
@@ -171,29 +171,29 @@ export function HostSessionPage() {
 
   return (
     <div
-      className="relative min-h-screen text-[#e8d5a0]"
+      className="relative min-h-dvh text-[#e8d5a0]"
       style={{ backgroundImage: 'url(/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-[#080a10]/78" />
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-dvh">
       {/* Header */}
-      <header className="flex flex-col gap-3 border-b border-[#7a5c1c] bg-[#0c0f18]/90 px-3 py-3 shadow-[0_2px_15px_rgba(200,168,75,0.1)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-        <div>
+      <header className="flex flex-row items-center justify-between gap-2 border-b border-[#7a5c1c] bg-[#0c0f18]/90 px-3 py-2 shadow-[0_2px_15px_rgba(200,168,75,0.1)] backdrop-blur-sm sm:gap-3 sm:px-6 sm:py-4">
+        <div className="min-w-0 shrink-0">
           <p className="text-[0.65rem] uppercase tracking-[0.2em] text-[#9d8a5e] sm:text-xs sm:tracking-[0.25em]" style={{ fontFamily: 'Cinzel, serif' }}>Host Control</p>
-          <p className="text-xl font-bold sm:text-2xl" style={{ fontFamily: 'Cinzel, serif' }}>
+          <p className="whitespace-nowrap text-xl font-bold sm:text-2xl" style={{ fontFamily: 'Cinzel, serif' }}>
             ROOM:{' '}
             <span className="font-mono text-[#f0c040]" style={{ textShadow: '0 0 10px rgba(200,168,75,0.5)' }}>{session.join_code}</span>
           </p>
         </div>
-        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-4">
-          <div className="flex items-center gap-2 text-[#9d8a5e]">
+        <div className="flex shrink-0 items-center justify-end gap-2 overflow-x-auto sm:gap-4">
+          <div className="flex shrink-0 items-center gap-2 text-[#9d8a5e]">
             <Users className="h-5 w-5" />
             <span className="text-lg font-semibold text-[#c8a84b]">{players.length}</span>
           </div>
           <button
             onClick={() => setShowAdminPanel(true)}
             title="Adjust player points"
-            className="rounded border border-[#7a5c1c] bg-[#10131e] p-2 text-[#9d8a5e] transition-all hover:border-[#c8a84b] hover:text-[#c8a84b] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]"
+            className="shrink-0 rounded border border-[#7a5c1c] bg-[#10131e] p-2 text-[#9d8a5e] transition-all hover:border-[#c8a84b] hover:text-[#c8a84b] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]"
           >
             <Settings className="h-5 w-5" />
           </button>
@@ -201,7 +201,7 @@ export function HostSessionPage() {
             <Button
               variant="danger"
               size="sm"
-              className="order-last sm:order-none"
+              className="shrink-0 whitespace-nowrap"
               onClick={() => setShowFinishConfirmation(true)}
             >
               <span className="sm:hidden">FINISH</span>
@@ -212,7 +212,7 @@ export function HostSessionPage() {
             href={`/sessions/${sessionId}/leaderboard`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${isAdmin ? 'hidden md:inline-flex' : 'inline-flex'} rounded border border-[#c8a84b] bg-[#10131e] px-3 py-1.5 text-sm font-semibold text-[#c8a84b] transition-all hover:border-[#f0c040] hover:text-[#f0c040] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]`}
+            className={`${isAdmin ? 'hidden md:inline-flex' : 'inline-flex'} shrink-0 whitespace-nowrap rounded border border-[#c8a84b] bg-[#10131e] px-3 py-1.5 text-sm font-semibold text-[#c8a84b] transition-all hover:border-[#f0c040] hover:text-[#f0c040] hover:shadow-[0_0_10px_rgba(200,168,75,0.3)]`}
           >
             Open Leaderboard ↗
           </a>
