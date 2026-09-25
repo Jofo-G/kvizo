@@ -404,6 +404,23 @@ export async function fetchAnswersForSession(sessionId: string): Promise<Answer[
   return data as Answer[]
 }
 
+export interface SessionSpeedEntry {
+  session_player_id: string
+  avg_seconds: number
+  answer_count: number
+}
+
+/** Public (no-auth) per-player average time-to-correct-answer for a session. */
+export async function fetchSessionSpeedLeaderboard(sessionId: string): Promise<SessionSpeedEntry[]> {
+  const { data, error } = await supabase.rpc('get_session_speed_leaderboard', { p_session_id: sessionId })
+  if (error) throw error
+  return (data ?? []).map((row: SessionSpeedEntry) => ({
+    session_player_id: row.session_player_id,
+    avg_seconds: Number(row.avg_seconds),
+    answer_count: row.answer_count,
+  }))
+}
+
 export async function fetchAnswersForQuestion(
   sessionId: string,
   questionId: string,

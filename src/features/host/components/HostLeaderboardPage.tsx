@@ -1,5 +1,5 @@
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { fetchAnswersForSession } from '../../quizzes/api/quizApi'
+import { fetchSessionSpeedLeaderboard } from '../../quizzes/api/quizApi'
 import { useHostSession } from '../hooks/useHostSession'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -12,9 +12,9 @@ export function HostLeaderboardPage() {
   const { session, players, loading } = useHostSession(sessionId!)
   const [tab, setTab] = useState<'score' | 'fastest'>('score')
 
-  const { data: answers } = useQuery({
-    queryKey: ['answers', sessionId],
-    queryFn: () => fetchAnswersForSession(sessionId!),
+  const { data: speedEntries } = useQuery({
+    queryKey: ['speed_leaderboard', sessionId],
+    queryFn: () => fetchSessionSpeedLeaderboard(sessionId!),
     enabled: !!sessionId,
     refetchInterval: 3000,
   })
@@ -26,20 +26,8 @@ export function HostLeaderboardPage() {
 
   // Average seconds-to-answer on correct answers only — lower is faster.
   const avgSecondsByPlayer = new Map<string, number>()
-  if (answers) {
-    const totals = new Map<string, { sum: number; count: number }>()
-    for (const a of answers) {
-      if (!a.is_correct || !a.question_started_at) continue
-      const seconds = (new Date(a.submitted_at).getTime() - new Date(a.question_started_at).getTime()) / 1000
-      if (!Number.isFinite(seconds) || seconds < 0) continue
-      const entry = totals.get(a.session_player_id) ?? { sum: 0, count: 0 }
-      entry.sum += seconds
-      entry.count += 1
-      totals.set(a.session_player_id, entry)
-    }
-    for (const [playerId, { sum, count }] of totals) {
-      avgSecondsByPlayer.set(playerId, sum / count)
-    }
+  for (const entry of speedEntries ?? []) {
+    avgSecondsByPlayer.set(entry.session_player_id, entry.avg_seconds)
   }
 
   const scoreSorted = [...players].sort((a, b) => b.score - a.score)
