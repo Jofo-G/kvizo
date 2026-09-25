@@ -14,7 +14,7 @@ import type { Answer, Question } from '@/shared/types'
 import { QRCodeSVG } from 'qrcode.react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Settings, Trophy, Users, X } from 'lucide-react'
+import { Settings, Trophy, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../auth/AuthProvider'
 
@@ -348,7 +348,7 @@ export function HostSessionPage() {
                           aria-label="Go back — reopen answers"
                           title="Go back — reopen answers"
                         >
-                          <ArrowLeft className="h-5 w-5" />
+                          Open ans.
                         </Button>
                       )}
                       {hasNextQuestion && (
@@ -359,7 +359,7 @@ export function HostSessionPage() {
                           aria-label={`Next question (${currentIdx + 2}/${questions?.length})`}
                           title={`Next question (${currentIdx + 2}/${questions?.length})`}
                         >
-                          <ArrowRight className="h-5 w-5" />
+                          Next Q.
                         </Button>
                       )}
                     </div>
